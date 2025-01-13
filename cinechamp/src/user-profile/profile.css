@@ -1,0 +1,9 @@
+.profile{
+    background-color: skyblue;
+    width: 100%;
+    display: flex;
+}
+
+.profile-info p{
+    font-size: 1.5em;
+}

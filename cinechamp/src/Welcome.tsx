@@ -1,16 +1,9 @@
-import React from 'react'
-
-// Componente principal que muestra un mensaje de bienvenida
-function Welcome({ nombre }: { nombre: string }) {
-  return <h1>¡Bienvenido, {nombre}!</h1>
+interface WelcomeProps {
+  name: string;
 }
 
-function App() {
-  return (
-    <div>
-      <Welcome nombre="Mundo" />
-    </div>
-  )
-}
+const Welcome: React.FC<WelcomeProps> = ({ name }) => {
+  return <h1>¡Hola, {name}!</h1>;
+};
 
-export default App
+export default Welcome;
