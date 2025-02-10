@@ -12,7 +12,7 @@ const Profile: React.FC<ProfileProps> = ({ img, nick, ubicacion, grupo }) => {
     return (
 
         <div className="profile">
-            <div className="profile-img">
+            <div className="profile-img">   
             <img src={img} alt="imagen de perfil" />
             </div>
 
