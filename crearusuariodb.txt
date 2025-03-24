@@ -1,0 +1,5 @@
+CREATE USER 'cinechamp'@'localhost' IDENTIFIED BY 'admin123';
+
+GRANT ALL PRIVILEGES ON cinechampdb.* TO 'cinechamp'@'localhost';
+
+FLUSH PRIVILEGES;

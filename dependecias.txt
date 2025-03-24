@@ -1,0 +1,8 @@
+Instaladas en el backend:
+
+express: Framework para la API.
+mysql2: Para conectarte a MySQL.
+dotenv: Para manejar variables de entorno.
+cors: Para permitir peticiones desde el frontend.
+jsonwebtoken: Para autenticación con JWT.
+bcryptjs: Para encriptar contraseñas.
