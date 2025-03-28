@@ -1,41 +1,32 @@
-const mysql = require('mysql2');
 const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+const db = require('./models/db.js');
+const usuarioRoutes = require('./routes/usuarioRoutes');
+
 const app = express();
-const port = 3000;
+app.use(cors());
+app.use(express.json());
 
-// Ruta de prueba
+app.use('/usuarios', usuarioRoutes);
+
+// Ruta raíz
 app.get('/', (req, res) => {
-    res.send('¡Hola, mundo desde Express!');
+  res.send('API corriendo 🎉');
 });
 
-// Iniciar el servidor
-app.listen(port, () => {
-    console.log(`Servidor corriendo en http://localhost:${port}`);
+// Ruta para comprobar conexión a la base de datos
+app.get('/check-db', async (req, res) => {
+  try {
+    await db.query('SELECT 1');
+    res.send('✅ Conectado a la base de datos');
+  } catch (error) {
+    console.error('❌ Error de conexión:', error);
+    res.status(500).send('❌ No se pudo conectar a la base de datos');
+  }
 });
 
-// Conexión a la base de datos
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'cinechamp',
-    password: 'admin123.',
-    database: 'dbcinechamp'
-});
-
-connection.connect(err => {
-    if (err) {
-        console.error('Error de conexión:', err);
-        return;
-    }
-    console.log('Conectado a la base de datos MySQL');
-});
-
-// Ruta que obtiene datos de la base
-app.get('/heroes', (req, res) => {
-    connection.query('SELECT * FROM heroes', (err, results) => {
-        if (err) {
-            res.status(500).send('Error en la base de datos');
-            return;
-        }
-        res.json(results);
-    });
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor backend corriendo en http://localhost:${PORT}`);
 });
