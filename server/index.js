@@ -3,19 +3,21 @@ const cors = require('cors');
 require('dotenv').config();
 const db = require('./models/db.js');
 const usuarioRoutes = require('./routes/usuarioRoutes');
+const contenidoRoutes = require('./routes/contenidoRoutes');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 app.use('/usuarios', usuarioRoutes);
+app.use('/contenido', contenidoRoutes); // ✅ Aquí conectás la ruta de búsqueda
 
 // Ruta raíz
 app.get('/', (req, res) => {
   res.send('API corriendo 🎉');
 });
 
-// Ruta para comprobar conexión a la base de datos
+// Verificar conexión a la base de datos
 app.get('/check-db', async (req, res) => {
   try {
     await db.query('SELECT 1');
