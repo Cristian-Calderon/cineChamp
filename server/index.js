@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/usuarios', usuarioRoutes);
-app.use('/contenido', contenidoRoutes); // ✅ Aquí conectás la ruta de búsqueda
+app.use('/contenido', contenidoRoutes); 
 
 // Ruta raíz
 app.get('/', (req, res) => {

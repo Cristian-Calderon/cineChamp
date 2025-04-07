@@ -1,7 +1,9 @@
+// controllers/usuarioController.js
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Usuario = require('../models/usuarioModel');
-const db = require('../models/db.js');
+const db = require('../models/db');
+require('dotenv').config();
 
 async function registrar(req, res) {
   try {
@@ -21,15 +23,17 @@ async function login(req, res) {
     if (!user || !(await bcrypt.compare(contraseña, user.contraseña))) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
     res.json({ token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
 
-
-// Obtener usuario por ID
 async function obtenerUsuario(req, res) {
   try {
     const { id } = req.params;
@@ -41,7 +45,6 @@ async function obtenerUsuario(req, res) {
   }
 }
 
-// Actualizar usuario
 async function actualizarUsuario(req, res) {
   try {
     const { id } = req.params;
@@ -54,7 +57,6 @@ async function actualizarUsuario(req, res) {
   }
 }
 
-// Eliminar usuario
 async function eliminarUsuario(req, res) {
   try {
     const { id } = req.params;
@@ -66,11 +68,20 @@ async function eliminarUsuario(req, res) {
   }
 }
 
-// Obtener todos los usuarios (solo nick y email)
-async function obtenerTodosLosUsuarios() {
-  const [rows] = await db.query('SELECT nick, email FROM usuario');
-  return rows;
+async function obtenerTodosLosUsuarios(req, res) {
+  try {
+    const [rows] = await db.query('SELECT nick, email FROM usuario');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener usuarios' });
+  }
 }
 
-
-module.exports = { registrar, login, eliminarUsuario,actualizarUsuario,obtenerUsuario,obtenerTodosLosUsuarios };
+module.exports = {
+  registrar,
+  login,
+  eliminarUsuario,
+  actualizarUsuario,
+  obtenerUsuario,
+  obtenerTodosLosUsuarios
+};

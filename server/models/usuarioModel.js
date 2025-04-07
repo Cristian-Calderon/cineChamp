@@ -1,47 +1,47 @@
-// Importa una conexion a la base de datos desde un modulo db.
+// models/usuarioModel.js
 const db = require('./db');
 
-
-// Funcion asincrona para crear un nuevo usuario en la base de datos.
-async function crearUsuario(nick, email, passwordHash, avatar) {
+const crearUsuario = async (nick, email, contraseña, avatar) => {
   const [result] = await db.query(
     'INSERT INTO usuario (nick, email, contraseña, avatar) VALUES (?, ?, ?, ?)',
-    [nick, email, passwordHash, avatar]
+    [nick, email, contraseña, avatar]
   );
   return result.insertId;
-}
+};
 
-// Funcion para buscar un usuario por email.
-async function obtenerUsuarioPorEmail(email) {
-  const [rows] = await db.query('SELECT * FROM usuario WHERE email = ?', [email]);
+const obtenerUsuarioPorEmail = async (email) => {
+  const [rows] = await db.query(
+    'SELECT * FROM usuario WHERE email = ?',
+    [email]
+  );
   return rows[0];
-}
+};
 
-// Obtener usuario por ID
-async function obtenerUsuarioPorId(id) {
-  const [rows] = await db.query('SELECT * FROM usuario WHERE id = ?', [id]);
+const obtenerUsuarioPorId = async (id) => {
+  const [rows] = await db.query(
+    'SELECT id, nick, email, avatar FROM usuario WHERE id = ?',
+    [id]
+  );
   return rows[0];
-}
+};
 
-async function eliminarUsuario(id) {
-  const [result] = await db.query('DELETE FROM usuario WHERE id = ?', [id]);
-  return result.affectedRows;
-}
-
-// Actualizar usuario
-async function actualizarUsuario(id, nick, email, avatar) {
+const actualizarUsuario = async (id, nick, email, avatar) => {
   const [result] = await db.query(
     'UPDATE usuario SET nick = ?, email = ?, avatar = ? WHERE id = ?',
     [nick, email, avatar, id]
   );
   return result.affectedRows;
-}
+};
 
-// Obtener todos los usuarios (solo nick y email)
-async function obtenerTodosLosUsuarios() {
-  const [rows] = await db.query('SELECT nick, email FROM usuario');
-  return rows;
-}
+const eliminarUsuario = async (id) => {
+  const [result] = await db.query('DELETE FROM usuario WHERE id = ?', [id]);
+  return result.affectedRows;
+};
 
-
-module.exports = { crearUsuario, obtenerUsuarioPorEmail,actualizarUsuario,eliminarUsuario,obtenerUsuarioPorId };
+module.exports = {
+  crearUsuario,
+  obtenerUsuarioPorEmail,
+  obtenerUsuarioPorId,
+  actualizarUsuario,
+  eliminarUsuario
+};

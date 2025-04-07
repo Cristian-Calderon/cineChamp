@@ -1,4 +1,6 @@
 const { buscarContenido } = require('../models/contenidoModel');
+const { buscarPeliculas, buscarSeries } = require('../models/apiUsuarioModel');
+const db = require('../models/db');
 const fetch = require('node-fetch');
 require('dotenv').config();
 
@@ -17,7 +19,6 @@ const verificarConexionAPI = async (req, res) => {
   try {
     const response = await fetch(`${BASE_URL}/movie/550?api_key=${API_KEY}`);
     const data = await response.json();
-
     if (data && data.id) {
       res.send('✅ Conectado a TMDB API: ' + data.title);
     } else {
@@ -29,7 +30,51 @@ const verificarConexionAPI = async (req, res) => {
   }
 };
 
+const buscarPeliculasController = async (req, res) => {
+  const query = req.query.q;
+  const resultados = await buscarContenido(query); 
+  res.json(resultados);
+};
+
+const buscarSeriesController = async (req, res) => {
+  const query = req.query.q;
+  const resultados = await buscarSeries(query);
+  res.json(resultados);
+};
+
+const agregarContenidoController = async (req, res) => {
+  const { id, title, name } = req.body;
+  try {
+    await db.query(
+      'INSERT IGNORE INTO agregados (id_tmdb, titulo) VALUES (?, ?)',
+      [id, title || name]
+    );
+    res.status(200).json({ message: 'Contenido agregado' });
+  } catch (error) {
+    console.error('Error al agregar contenido:', error);
+    res.status(500).json({ error: 'Error interno' });
+  }
+};
+
+const favoritoContenidoController = async (req, res) => {
+  const { id, title, name } = req.body;
+  try {
+    await db.query(
+      'INSERT IGNORE INTO favoritos (id_tmdb, titulo) VALUES (?, ?)',
+      [id, title || name]
+    );
+    res.status(200).json({ message: 'Marcado como favorito' });
+  } catch (error) {
+    console.error('Error al marcar favorito:', error);
+    res.status(500).json({ error: 'Error interno' });
+  }
+};
+
 module.exports = {
   buscarAPI,
-  verificarConexionAPI
+  verificarConexionAPI,
+  buscarPeliculasController,
+  buscarSeriesController,
+  favoritoContenidoController,
+  agregarContenidoController
 };
