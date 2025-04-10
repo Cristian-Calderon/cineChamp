@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/usuarios', usuarioRoutes);
+app.use('/api/usuarios', usuarioRoutes);
 app.use('/contenido', contenidoRoutes); 
 
 // Ruta raíz
