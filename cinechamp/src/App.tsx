@@ -25,20 +25,12 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 
-          Si NO hay token, forzamos a que la ruta "/" redirija a "/login".
-          Si hay token, enviamos a Home (o la ruta principal que prefieras).
-        */}
         <Route
           path="/"
           element={
             token ? <Home onLogout={handleLogout} /> : <Navigate to="/login" />
           }
         />
-
-        {/* 
-          Ruta de Login. Si hay token, redirigimos a "/", si no, mostramos el componente <Login />
-        */}
         <Route
           path="/login"
           element={
@@ -50,10 +42,6 @@ function App() {
           }
         />
 
-        {/* 
-          Ruta de Register. Igualmente, si hay token, redirigimos a "/", 
-          si no hay token, mostramos <Register />
-        */}
         <Route
           path="/register"
           element={token ? <Navigate to="/" /> : <Register />}
@@ -69,12 +57,6 @@ function App() {
             )
           }
         />
-
-        {/* 
-          Para cualquier otra ruta, si no la encuentra, podrías redirigirla 
-          a "/" o a alguna página de error 404, a gusto.
-        */}
-
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

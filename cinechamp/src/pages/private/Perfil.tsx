@@ -27,11 +27,9 @@ export default function Perfil({ onLogout }: PerfilProps) {
   const { nick } = useParams(); // <- viene desde la URL
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("nick");
-    navigate("/login");
-  };
+  const goHome = () => {
+    navigate("/");
+  };  
 
   const [profile, setProfile] = useState<Profile>({
     name: "",
@@ -154,6 +152,8 @@ export default function Perfil({ onLogout }: PerfilProps) {
           >
             Cerrar sesión
           </button>
+          <button onClick={goHome}>Ir al Home</button>
+
         </div>
       </div>
     </div>
