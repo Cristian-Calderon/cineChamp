@@ -1,4 +1,5 @@
 // models/usuarioModel.js
+const { obtenerUsuario } = require('../controllers/usuarioController');
 const db = require('./db');
 
 const crearUsuario = async (nick, email, contraseña, avatar) => {
@@ -38,10 +39,20 @@ const eliminarUsuario = async (id) => {
   return result.affectedRows;
 };
 
+const obtenerUsuarioPorNick = async (nick) => {
+  const [rows] = await db.query(
+    'SELECT id, nick, email, avatar FROM usuario WHERE nick = ?',
+    [nick]
+  );
+  return rows[0];
+};
+
 module.exports = {
   crearUsuario,
   obtenerUsuarioPorEmail,
   obtenerUsuarioPorId,
   actualizarUsuario,
-  eliminarUsuario
+  eliminarUsuario,
+  obtenerUsuario,
+  obtenerUsuarioPorNick
 };

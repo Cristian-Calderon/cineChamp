@@ -1,6 +1,7 @@
-// src/pages/Perfil.tsx
+// src/pages/private/Perfil.tsx
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 
 type Movie = {
   id: number;
@@ -13,23 +14,56 @@ type Profile = {
   photoUrl: string;
 };
 
-export default function Perfil() {
+type UserResponse = {
+  nick: string;
+  avatar?: string;
+};
+
+interface PerfilProps {
+  onLogout: () => void;
+}
+
+export default function Perfil({ onLogout }: PerfilProps) {
+  const { nick } = useParams(); // <- viene desde la URL
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("nick");
+    navigate("/login");
+  };
+
   const [profile, setProfile] = useState<Profile>({
-    name: "Juan Pérez",
-    photoUrl: "https://i.pravatar.cc/150?img=3",
+    name: "",
+    photoUrl: "",
   });
 
   const [favorites, setFavorites] = useState<Movie[]>([]);
   const [latest, setLatest] = useState<Movie[]>([]);
   const [query, setQuery] = useState("");
 
-  const navigate = useNavigate();
-
   useEffect(() => {
-    fetch("/api/profile").then((res) => res.json()).then(setProfile);
-    fetch("/api/favorites").then((res) => res.json()).then(setFavorites);
-    fetch("/api/latest").then((res) => res.json()).then(setLatest);
-  }, []);
+    if (!nick) return;
+
+    // 🔁 Traer datos del usuario desde el backend
+    axios
+      .get<UserResponse>(`http://localhost:3000/api/usuarios/nick/${nick}`)
+      .then((res) => {
+        const user = res.data;
+        setProfile({
+          name: user.nick,
+          photoUrl: user.avatar || "https://i.pravatar.cc/150?img=3",
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        navigate("/"); // Si hay error, redirige a inicio
+      });
+
+    // (Opcional) Traer favoritos y últimas
+    // axios.get("/api/favorites").then((res) => setFavorites(res.data));
+    // axios.get("/api/latest").then((res) => setLatest(res.data));
+  }, [nick, navigate]);
 
   const buscarPeliculas = () => {
     if (!query) return;
@@ -38,7 +72,7 @@ export default function Perfil() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Mi Perfil</h1>
+      <h1 className="text-3xl font-bold mb-6">Perfil de {nick}</h1>
 
       {/* Perfil */}
       <div className="border rounded-xl p-4 shadow-md flex items-center gap-6 mb-10">
@@ -59,7 +93,10 @@ export default function Perfil() {
         <h2 className="text-2xl font-semibold mb-4">Películas Favoritas</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
           {favorites.map((movie) => (
-            <div key={movie.id} className="border rounded shadow-sm overflow-hidden">
+            <div
+              key={movie.id}
+              className="border rounded shadow-sm overflow-hidden"
+            >
               <img
                 src={movie.posterUrl}
                 alt={movie.title}
@@ -73,10 +110,15 @@ export default function Perfil() {
 
       {/* Últimas Agregadas */}
       <div className="border rounded-xl p-4 shadow-md mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Últimas Películas Agregadas</h2>
+        <h2 className="text-2xl font-semibold mb-4">
+          Últimas Películas Agregadas
+        </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
           {latest.map((movie) => (
-            <div key={movie.id} className="border rounded shadow-sm overflow-hidden">
+            <div
+              key={movie.id}
+              className="border rounded shadow-sm overflow-hidden"
+            >
               <img
                 src={movie.posterUrl}
                 alt={movie.title}
@@ -103,6 +145,14 @@ export default function Perfil() {
             className="bg-blue-600 text-white px-4 py-2 rounded"
           >
             Buscar
+          </button>
+
+          {/* Boton cerrar sesion */}
+          <button
+            onClick={onLogout}
+            className="bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700"
+          >
+            Cerrar sesión
           </button>
         </div>
       </div>

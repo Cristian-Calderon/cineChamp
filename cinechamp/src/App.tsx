@@ -41,7 +41,13 @@ function App() {
         */}
         <Route
           path="/login"
-          element={token ? <Navigate to="/" /> : <Login setToken={setToken} />}
+          element={
+            token ? (
+              <Navigate to={`/id/${localStorage.getItem("nick")}`} />
+            ) : (
+              <Login setToken={setToken} />
+            )
+          }
         />
 
         {/* 
@@ -54,8 +60,14 @@ function App() {
         />
 
         <Route
-          path="/perfil"
-          element={token ? <Perfil /> : <Navigate to="/login" />}
+          path="/id/:nick"
+          element={
+            token ? (
+              <Perfil onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
         />
 
         {/* 

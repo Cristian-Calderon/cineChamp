@@ -28,7 +28,8 @@ async function login(req, res) {
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
-    res.json({ token });
+    // Enviamos el toker y enviamos el id
+    res.json({ token, nick:user.nick });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -76,6 +77,19 @@ async function obtenerTodosLosUsuarios(req, res) {
     res.status(500).json({ error: 'Error al obtener usuarios' });
   }
 }
+// usuarioController.js
+async function obtenerUsuarioPorNick(req, res) {
+  try {
+    const { nick } = req.params;
+    const user = await Usuario.obtenerUsuarioPorNick(nick);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+
 
 module.exports = {
   registrar,
@@ -83,5 +97,6 @@ module.exports = {
   eliminarUsuario,
   actualizarUsuario,
   obtenerUsuario,
-  obtenerTodosLosUsuarios
+  obtenerTodosLosUsuarios,
+  obtenerUsuarioPorNick
 };
