@@ -7,8 +7,9 @@ type Resultado = {
 };
 
 export default function Search() {
-  const [peticionUsuario, setQuery] = useState('');
   //Guarda lo que el usuario escribe en el input de búsqueda.
+  const [peticionUsuario, setQuery] = useState('');
+  //Guarda los resultados de películas y series por separado.
   const [peliculas, setPeliculas] = useState<Resultado[]>([]);
   const [series, setSeries] = useState<Resultado[]>([]);
   //mostrar mensajes mientras cargan los datos
@@ -24,14 +25,15 @@ export default function Search() {
     try {
       //hace 2 peticiones fecth al mismo tiempo al back-end(server-apiUusuarioModel)
       const [resPeliculas, resSeries] = await Promise.all([
-        fetch(`http://localhost:3000/contenido/buscar?q=${encodeURIComponent(peticionUsuario)}`),
-        fetch(`http://localhost:3000/contenido/buscarS?q=${encodeURIComponent(peticionUsuario)}`),
+        fetch(`http://localhost:3001/contenido/buscar?q=${encodeURIComponent(peticionUsuario)}`),
+        fetch(`http://localhost:3001/contenido/buscarS?q=${encodeURIComponent(peticionUsuario)}`),
       ]);
       
       //convierte la respuesta en un json
       const peliculasData = await resPeliculas.json();
       const seriesData = await resSeries.json();
-      //ahora guarda eso en estados
+
+      //guardamos
       setPeliculas(peliculasData);
       setSeries(seriesData);
     } catch (error) {
@@ -43,7 +45,7 @@ export default function Search() {
 
   const agregarFavoritos = async (item : Resultado) => {
     try {
-      await fetch('http://localhost:3000/contenido/favorito', {
+      await fetch('http://localhost:3001/contenido/favorito', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(item),
@@ -61,7 +63,7 @@ export default function Search() {
     if (agregados.includes(item.id)) return;
   
     try {
-      await fetch('http://localhost:3000/contenido/agregar', {
+      await fetch('http://localhost:3001/contenido/agregar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(item),
@@ -81,7 +83,7 @@ export default function Search() {
         onClick={() => agregarElemento(item)}
         style={{ marginLeft: '1rem' }}
       >
-        ➕ Agregar
+        Agregar
       </button>
       <button
         onClick={() => agregarFavoritos(item)}
@@ -90,7 +92,7 @@ export default function Search() {
           color: favoritos.includes(item.id) ? 'gold' : 'gray',
         }}
       >
-        ⭐ Favorito
+        Favorito
       </button>
     </li>
   );

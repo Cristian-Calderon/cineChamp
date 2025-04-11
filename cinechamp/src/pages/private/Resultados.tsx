@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+
+//definimos el tipo de pelicula que esperamos
 type Movie = {
   id: number;
   title: string;
@@ -24,7 +26,7 @@ export default function Resultados() {
     const buscar = async () => {
       if (!query) return;
       try {
-        const res = await fetch(`http://localhost:3000/contenido/buscar-peliculas?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`http://localhost:3001/contenido/buscar-peliculas?q=${encodeURIComponent(query)}`);
 
         const data = await res.json();
         console.log("🔎 Resultados desde backend:", data);
@@ -64,7 +66,7 @@ export default function Resultados() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-4 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Resultados para: "{query}"</h1>
 
       {loading ? (
@@ -79,10 +81,10 @@ export default function Resultados() {
                 <img
                   src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                   alt={movie.title || movie.name}
-                  className="w-full h-48 object-cover rounded mb-2"
+                  className="w-full h-[100px] object-cover rounded mb-2"
                 />
               ) : (
-                <div className="w-full h-48 bg-gray-200 flex items-center justify-center mb-2 rounded">
+                <div className="w-full h-[100px] bg-gray-200 flex items-center justify-center mb-2 rounded">
                   <span className="text-sm text-gray-600">Sin imagen</span>
                 </div>
               )}

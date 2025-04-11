@@ -9,6 +9,7 @@ router.post('/login', UsuarioController.login);
 
 // CRUD de usuarios
 router.get('/', UsuarioController.obtenerTodosLosUsuarios);
+router.get('/nick/:nick', UsuarioController.obtenerUsuarioPorNick);
 router.get('/:id', UsuarioController.obtenerUsuario);
 router.put('/:id', UsuarioController.actualizarUsuario);
 router.delete('/:id', UsuarioController.eliminarUsuario);

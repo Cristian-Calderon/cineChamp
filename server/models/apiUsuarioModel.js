@@ -33,4 +33,20 @@ const buscarSeries = async (query) => {
   }
 };
 
-module.exports = { buscarPeliculas, buscarSeries };
+//funcion con 2 parametros
+const obtenerDetallesPorId = async (id, tipo = 'movie') => {
+  try {
+    //peticion a  tmmdb
+    const res = await fetch(
+      `${BASE_URL}/${tipo}/${id}?api_key=${API_KEY}&language=es-ES`
+    );
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error(`Error al obtener detalles para ${tipo} con id ${id}:`, error);
+    return null;
+  }
+};
+
+
+module.exports = { buscarPeliculas, buscarSeries, obtenerDetallesPorId };

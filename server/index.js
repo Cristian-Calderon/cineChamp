@@ -4,13 +4,18 @@ require('dotenv').config();
 const db = require('./models/db.js');
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const contenidoRoutes = require('./routes/contenidoRoutes');
+const logrosRoutes = require('./routes/logrosRoutes');
 
 const app = express();
+app.use(express.static('public'));
+
 app.use(cors());
 app.use(express.json());
+app.use('/api/logros', logrosRoutes);
 
-app.use('/usuarios', usuarioRoutes);
+app.use('/api/usuarios', usuarioRoutes);
 app.use('/contenido', contenidoRoutes); 
+
 
 // Ruta raíz
 app.get('/', (req, res) => {
@@ -28,7 +33,7 @@ app.get('/check-db', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Servidor backend corriendo en http://localhost:${PORT}`);
 });
