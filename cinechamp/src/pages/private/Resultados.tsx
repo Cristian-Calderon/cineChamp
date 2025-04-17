@@ -66,20 +66,31 @@ export default function Resultados() {
     console.log("✅ Backend respondió:", data);
   
     if (!response.ok) {
-      alert("⚠️ Error al agregar favorito: " + data.error);
-    } else {
-      alert("✅ Agregado a favoritos");
+      console.log("⚠️ Error al agregar favorito: " + data.error);
     }
   };
  
   // Historial de las peliculas que hemos visto:
   const agregarHistorial = async (movie: Movie) => {
-    await fetch("/contenido/agregar", {
+    const userId = parseInt(localStorage.getItem("userId") || "0");
+    console.log("👤 ID del usuario:", userId);
+
+    console.log("🛰️ Enviando a backend:", {
+      id_usuario: userId,
+      id_api: movie.id
+    });
+
+    const response = await fetch("http://localhost:3001/contenido/agregar",  {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: movie.id, title: movie.title || movie.name }),
+      body: JSON.stringify({
+        id_usuario: userId,
+        id_api: movie.id
+      }),
     });
-    alert("Agregado al historial");
+
+    
+    console.log("Se agrego al historial");
   };
 
   

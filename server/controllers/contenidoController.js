@@ -46,6 +46,8 @@ const buscarSeriesController = async (req, res) => {
 
 const agregarContenidoController = async (req, res) => {
   const { id_usuario, id_api } = req.body;
+  console.log("📩 Datos recibidos en favoritoContenidoController:", { id_usuario, id_api });
+
 
   if (!id_usuario || !id_api) {
     return res.status(400).json({ error: 'Faltan datos' });
@@ -73,7 +75,7 @@ const agregarContenidoController = async (req, res) => {
     );
 
     // 4. Verificar logros
-    await verificarLogros(id_usuario);
+    //await verificarLogros(id_usuario);
 
     res.status(201).json({ message: `${tipo === 'pelicula' ? 'Película' : 'Serie'} agregada correctamente.` });
   } catch (error) {
