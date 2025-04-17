@@ -48,14 +48,31 @@ export default function Resultados() {
   }, [query]);
 
   const agregarFavorito = async (movie: Movie) => {
-    await fetch("/contenido/favorito", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: movie.id, title: movie.title || movie.name }),
-    });
-    alert("Agregado a favoritos");
-  };
+    const userId = parseInt(localStorage.getItem("userId") || "0");
+    console.log("👤 ID del usuario:", userId);
 
+    const response = await fetch("http://localhost:3001/contenido/favorito", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id_usuario: userId,
+        id_tmdb: movie.id
+      }),
+    });
+  
+    const data = await response.json();
+    console.log("✅ Backend respondió:", data);
+  
+    if (!response.ok) {
+      alert("⚠️ Error al agregar favorito: " + data.error);
+    } else {
+      alert("✅ Agregado a favoritos");
+    }
+  };
+ 
+  // Historial de las peliculas que hemos visto:
   const agregarHistorial = async (movie: Movie) => {
     await fetch("/contenido/agregar", {
       method: "POST",
@@ -64,6 +81,8 @@ export default function Resultados() {
     });
     alert("Agregado al historial");
   };
+
+  
 
   return (
     <div className="p-4 max-w-4xl mx-auto">

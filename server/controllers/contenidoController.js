@@ -35,6 +35,7 @@ const buscarPeliculasController = async (req, res) => {
   const query = req.query.q;
   const resultados = await buscarContenido(query); 
   res.json(resultados);
+
 };
 
 const buscarSeriesController = async (req, res) => {
@@ -83,6 +84,8 @@ const agregarContenidoController = async (req, res) => {
 
 const favoritoContenidoController = async (req, res) => {
   const { id_usuario, id_tmdb } = req.body;
+  console.log("📩 Datos recibidos en favoritoContenidoController:", { id_usuario, id_tmdb });
+
 
   if (!id_usuario || !id_tmdb) {
     return res.status(400).json({ error: 'Faltan datos' });
@@ -112,7 +115,7 @@ const favoritoContenidoController = async (req, res) => {
     );
 
     // 4. Verificamos logros automáticamente
-    await verificarLogros(id_usuario);
+    //await verificarLogros(id_usuario);
 
     res.status(201).json({ message: `${tipo === 'pelicula' ? 'Película' : 'Serie'} marcada como favorita: ${titulo}` });
   } catch (error) {

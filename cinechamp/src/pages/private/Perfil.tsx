@@ -34,9 +34,8 @@ export default function Perfil({ onLogout }: PerfilProps) {
   const { nick } = useParams();
   const navigate = useNavigate();
 
-
   const goHome = () => {
-  navigate("/");
+    navigate("/");
   };
 
   const [profile, setProfile] = useState<Profile>({ name: "", photoUrl: "" });
@@ -46,15 +45,29 @@ export default function Perfil({ onLogout }: PerfilProps) {
   const [query, setQuery] = useState("");
   const [userId, setUserId] = useState<number | null>(null);
 
+  // Redirigir si no hay token
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
   // Obtener usuario por nick y guardar ID
   useEffect(() => {
     if (!nick) return;
 
+    const token = localStorage.getItem("token");
+
     axios
-      .get<UserResponse>(`http://localhost:3001/api/usuarios/nick/${nick}`)
+      .get<UserResponse>(`http://localhost:3001/api/usuarios/nick/${nick}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       .then((res) => {
         const user = res.data;
-        setUserId(user.id); // Guardamos el ID del usuario
+        setUserId(user.id);
         setProfile({
           name: user.nick,
           photoUrl: user.avatar || "https://i.pravatar.cc/150?img=3",
@@ -62,25 +75,38 @@ export default function Perfil({ onLogout }: PerfilProps) {
       })
       .catch((err) => {
         console.error("Error al obtener usuario:", err);
-        navigate("/");
+        navigate("/login");
       });
   }, [nick, navigate]);
 
   // Obtener favoritos, historial y logros usando el userId
   useEffect(() => {
-    if (!userId) return;
+    const token = localStorage.getItem("token");
+    if (!userId || !token) return;
 
-    fetch(`/api/contenido/favoritos/${userId}`)
+    fetch(`/api/contenido/favoritos/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then(setFavorites)
       .catch(console.error);
 
-    fetch(`/api/contenido/historial/${userId}`)
+    fetch(`/api/contenido/historial/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then(setHistorial)
       .catch(console.error);
 
-    fetch(`/api/usuario/${userId}/logros`)
+    fetch(`/api/usuario/${userId}/logros`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         console.log("Logros desde backend:", data);
@@ -92,6 +118,12 @@ export default function Perfil({ onLogout }: PerfilProps) {
   const buscarPeliculas = () => {
     if (!query) return;
     navigate(`/resultados?q=${encodeURIComponent(query)}`);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    onLogout();
+    navigate("/login");
   };
 
   return (
@@ -185,13 +217,15 @@ export default function Perfil({ onLogout }: PerfilProps) {
           </button>
 
           <button
-            onClick={onLogout}
+            onClick={handleLogout}
             className="bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700"
           >
             Cerrar sesión
           </button>
-          <button onClick={goHome}>Ir al Home</button>
 
+          <button onClick={goHome} className="bg-gray-300 px-4 py-2 rounded">
+            Ir al Home
+          </button>
         </div>
       </div>
     </div>

@@ -24,10 +24,11 @@ function Login({ setToken }: LoginProps) {
       });
 
       
-      const { token, nick } = response.data as { token: string; nick: string };
+      const { token, nick, id } = response.data as { token: string; nick: string; id: string };
       // Guardamos el token en localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('nick', nick);
+      localStorage.setItem("userId", id);
       // Actualizamos el estado en App
       setToken(token);
       navigate(`/id/${nick}`)

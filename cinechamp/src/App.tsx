@@ -4,23 +4,19 @@ import Login from "./pages/auth/Login/Login";
 import Register from "./pages/auth/Register/Register";
 import Home from "./pages/private/Home/Home"; // Ejemplo de vista principal
 import Perfil from "./pages/private/Perfil";
+import Resultados from "./pages/private/Resultados";
 
-function App() {
-  // Este estado guardará el token. Si es null, se asume que el usuario no está autenticado.
-  const [token, setToken] = useState<string | null>(null);
 
-  useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    if (savedToken) {
-      setToken(savedToken);
-    }
-  }, []);
+export default function App() {
+  // El token ya se lee directamente desde localStorage al iniciar
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem("token"));
 
-  // Función para cerrar sesión (opcionalmente la podrías manejar en otro componente)
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("nick");
     setToken(null);
   };
+  
 
   return (
     <BrowserRouter>
@@ -31,12 +27,11 @@ function App() {
             token ? <Home onLogout={handleLogout} /> : <Navigate to="/login" />
           }
         />
-      <Route
-         path="/login"
-         element={<Login setToken={setToken} />}
-      />
 
-      
+        <Route
+          path="/login"
+          element={<Login setToken={setToken} />}
+        />
 
         <Route
           path="/register"
@@ -53,10 +48,18 @@ function App() {
             )
           }
         />
+
+
+        <Route
+         path="/resultados"
+         element={
+        token ? <Resultados /> : <Navigate to="/login" />
+         }
+        />
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   );
 }
 
-export default App;
