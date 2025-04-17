@@ -107,3 +107,13 @@ CREATE TABLE calificacion (
     CONSTRAINT unique_calificacion UNIQUE (id_usuario, id_biblioteca)
 );
 
+
+-- Tabla d contenido 
+CREATE TABLE contenido_guardado (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_api INT NOT NULL,
+    tipo ENUM('pelicula', 'serie') NOT NULL,
+    fecha_guardado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (id_usuario)
+);
