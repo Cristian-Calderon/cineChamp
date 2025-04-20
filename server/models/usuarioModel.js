@@ -1,4 +1,4 @@
-const { obtenerUsuario } = require('../controllers/usuarioController');
+
 const db = require('./db');
 
 const crearUsuario = async (nick, email, contraseña, avatar) => {
@@ -25,10 +25,10 @@ const obtenerUsuarioPorId = async (id) => {
   return rows[0];
 };
 
-const actualizarUsuario = async (id, nick, email, avatar) => {
+const actualizarUsuario = async (id, nick, avatar) => {
   const [result] = await db.query(
-    'UPDATE usuario SET nick = ?, email = ?, avatar = ? WHERE id = ?',
-    [nick, email, avatar, id]
+    'UPDATE usuario SET nick = ?, avatar = ? WHERE id = ?',
+    [nick, avatar, id]
   );
   return result.affectedRows;
 };
@@ -52,6 +52,5 @@ module.exports = {
   obtenerUsuarioPorId,
   actualizarUsuario,
   eliminarUsuario,
-  obtenerUsuario,
   obtenerUsuarioPorNick
 };

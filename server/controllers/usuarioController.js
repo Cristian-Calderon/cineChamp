@@ -35,22 +35,11 @@ async function login(req, res) {
   }
 }
 
-async function obtenerUsuario(req, res) {
-  try {
-    const { id } = req.params;
-    const usuario = await Usuario.obtenerUsuarioPorId(id);
-    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
-    res.json(usuario);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
-
 async function actualizarUsuario(req, res) {
   try {
     const { id } = req.params;
-    const { nick, email, avatar } = req.body;
-    const actualizado = await Usuario.actualizarUsuario(id, nick, email, avatar);
+    const { nick, avatar } = req.body;
+    const actualizado = await Usuario.actualizarUsuario(id, nick, avatar);
     if (actualizado === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
     res.json({ message: 'Usuario actualizado correctamente' });
   } catch (error) {
@@ -58,7 +47,13 @@ async function actualizarUsuario(req, res) {
   }
 }
 
-async function eliminarUsuario(req, res) {
+
+// parte de buscdor de usuarios
+
+
+
+
+/**async function eliminarUsuario(req, res) {
   try {
     const { id } = req.params;
     const eliminado = await Usuario.eliminarUsuario(id);
@@ -67,16 +62,9 @@ async function eliminarUsuario(req, res) {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+}*/
 
-async function obtenerTodosLosUsuarios(req, res) {
-  try {
-    const [rows] = await db.query('SELECT nick, email FROM usuario');
-    res.json(rows);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener usuarios' });
-  }
-}
+
 // usuarioController.js
 async function obtenerUsuarioPorNick(req, res) {
   try {
@@ -89,14 +77,27 @@ async function obtenerUsuarioPorNick(req, res) {
   }
 }
 
+async function buscarUsuariosPorNick(req, res) {
+  const { nick } = req.query;
+  if (!nick) return res.status(400).json({ error: "Falta el nick" });
+
+  try {
+    const [rows] = await db.query(
+      'SELECT id, nick, avatar FROM usuario WHERE nick LIKE ?',
+      [`%${nick}%`]
+    );
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 
 
 module.exports = {
   registrar,
   login,
-  eliminarUsuario,
+  buscarUsuariosPorNick,
   actualizarUsuario,
-  obtenerUsuario,
-  obtenerTodosLosUsuarios,
   obtenerUsuarioPorNick
 };

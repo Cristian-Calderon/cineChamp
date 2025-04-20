@@ -26,6 +26,19 @@ type UserResponse = {
   avatar?: string;
 };
 
+type Solicitud = {
+  id: number;     
+  usuario_id: number; 
+  nick: string;
+  avatar: string;
+}
+
+type Amigo = {
+  id: number;
+  nick: string;
+  avatar: string;
+};
+
 interface PerfilProps {
   onLogout: () => void;
 }
@@ -34,36 +47,33 @@ export default function Perfil({ onLogout }: PerfilProps) {
   const { nick } = useParams();
   const navigate = useNavigate();
 
-  const goHome = () => {
-    navigate("/");
-  };
-
   const [profile, setProfile] = useState<Profile>({ name: "", photoUrl: "" });
   const [favorites, setFavorites] = useState<Movie[]>([]);
   const [historial, setHistorial] = useState<Movie[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [query, setQuery] = useState("");
+  const [nickAmigo, setNickAmigo] = useState("");
   const [userId, setUserId] = useState<number | null>(null);
+
+  const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
+  const [amigos, setAmigos] = useState<Amigo[]>([]);
+
+  const goHome = () => navigate("/");
 
   // Redirigir si no hay token
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-    }
+    if (!token) navigate("/login");
   }, [navigate]);
 
-  // Obtener usuario por nick y guardar ID
+  // Obtener usuario por nick
   useEffect(() => {
     if (!nick) return;
-
     const token = localStorage.getItem("token");
 
     axios
       .get<UserResponse>(`http://localhost:3001/api/usuarios/nick/${nick}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
         const user = res.data;
@@ -79,45 +89,65 @@ export default function Perfil({ onLogout }: PerfilProps) {
       });
   }, [nick, navigate]);
 
-  // Obtener favoritos, historial y logros usando el userId
+  // Obtener favoritos, historial, logros, amigos y solicitudes
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!userId || !token) return;
 
     fetch(`/api/contenido/favoritos/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
       .then(setFavorites)
       .catch(console.error);
 
     fetch(`/api/contenido/historial/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
       .then(setHistorial)
       .catch(console.error);
 
     fetch(`/api/usuario/${userId}/logros`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
-      .then((data) => {
-        console.log("Logros desde backend:", data);
-        setAchievements(data);
-      })
+      .then(setAchievements)
+      .catch(console.error);
+
+    fetch(`http://localhost:3001/api/amigos/solicitudes/${userId}`)
+      .then((res) => res.json())
+      .then(setSolicitudes)
+      .catch(console.error);
+
+    fetch(`http://localhost:3001/api/amigos/lista/${userId}`)
+      .then((res) => res.json())
+      .then(setAmigos)
       .catch(console.error);
   }, [userId]);
 
   const buscarPeliculas = () => {
     if (!query) return;
     navigate(`/resultados?q=${encodeURIComponent(query)}`);
+  };
+
+  const buscarAmigo = () => {
+    if (!nickAmigo) return;
+    navigate(`/usuario/resultado?nick=${encodeURIComponent(nickAmigo)}`);
+  };
+
+  const aceptarSolicitud = async (amigoId: number) => {
+    const res = await fetch(`http://localhost:3001/api/amigos/solicitud/${amigoId}/aceptar`, {
+      method: "POST",
+    });
+  
+    const data = await res.json();
+    if (res.ok) {
+      setSolicitudes((prev) => prev.filter((s) => s.id !== amigoId));
+      
+    } else {
+      alert("❌ Error al aceptar: " + data.error);
+    }
   };
 
   const handleLogout = () => {
@@ -178,7 +208,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
         </div>
       </div>
 
-      {/* Logros estilo Steam */}
+      {/* Logros */}
       <div className="border rounded-xl p-4 shadow-md mb-10">
         <h2 className="text-2xl font-semibold mb-4">Logros</h2>
         <div className="flex flex-wrap gap-4">
@@ -199,34 +229,98 @@ export default function Perfil({ onLogout }: PerfilProps) {
         </div>
       </div>
 
-      {/* Buscador */}
+      {/* Buscar películas y amigos */}
       <div className="border rounded-xl p-4 shadow-md mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Buscar Películas</h2>
-        <div className="flex gap-2">
+        <h2 className="text-2xl font-semibold mb-4">Buscar</h2>
+        <div className="flex flex-col sm:flex-row gap-4">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="border p-2 rounded w-full"
-            placeholder="Nombre de la película"
+            placeholder="Nombre de película"
           />
           <button
             onClick={buscarPeliculas}
             className="bg-blue-600 text-white px-4 py-2 rounded"
           >
-            Buscar
+            Buscar Película
           </button>
+        </div>
 
+        <div className="flex flex-col sm:flex-row gap-4 mt-4">
+          <input
+            value={nickAmigo}
+            onChange={(e) => setNickAmigo(e.target.value)}
+            className="border p-2 rounded w-full"
+            placeholder="Buscar amigo por nick"
+          />
+          <button
+            onClick={buscarAmigo}
+            className="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Buscar Amigo
+          </button>
+        </div>
+
+        <div className="flex gap-2 mt-4">
           <button
             onClick={handleLogout}
             className="bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700"
           >
             Cerrar sesión
           </button>
-
           <button onClick={goHome} className="bg-gray-300 px-4 py-2 rounded">
             Ir al Home
           </button>
         </div>
+      </div>
+
+      {/* Solicitudes */}
+      <div className="border rounded-xl p-4 shadow-md mb-10">
+        <h2 className="text-2xl font-semibold mb-4">Solicitudes de amistad</h2>
+        {solicitudes.length === 0 ? (
+          <p className="text-gray-500">No tienes solicitudes pendientes.</p>
+        ) : (
+          <div className="space-y-3">
+            {solicitudes.map((s) => (
+              <div key={`amigo-${s.id}`}
+              className="flex items-center gap-4">
+                <img
+                  src={s.avatar || "https://i.pravatar.cc/150"}
+                  className="w-10 h-10 rounded-full object-cover border"
+                />
+                <span className="flex-1 font-medium">{s.nick}</span>
+                <button
+                  onClick={() => aceptarSolicitud(s.id)}
+                  className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+                >
+                  Aceptar
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Amigos */}
+      <div className="border rounded-xl p-4 shadow-md mb-10">
+        <h2 className="text-2xl font-semibold mb-4">Mis Amigos</h2>
+        {amigos.length === 0 ? (
+          <p className="text-gray-500">No tienes amigos aún.</p>
+        ) : (
+          <div className="flex flex-wrap gap-4">
+            {amigos.map((amigo) => (
+              <div key={amigo.id} className="text-center">
+                <img
+                  src={amigo.avatar || "https://i.pravatar.cc/150"}
+                  className="w-14 h-14 rounded-full border mb-1"
+                  alt={amigo.nick}
+                />
+                <p className="text-sm">{amigo.nick}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
