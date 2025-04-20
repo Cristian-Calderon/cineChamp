@@ -27,8 +27,8 @@ type UserResponse = {
 };
 
 type Solicitud = {
-  id: number;     
-  usuario_id: number; 
+  id: number;
+  usuario_id: number;
   nick: string;
   avatar: string;
 }
@@ -58,6 +58,10 @@ export default function Perfil({ onLogout }: PerfilProps) {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [amigos, setAmigos] = useState<Amigo[]>([]);
 
+  const [editNick, setEditNick] = useState("");
+  const [editAvatar, setEditAvatar] = useState("");
+
+
   const goHome = () => navigate("/");
 
   // Redirigir si no hay token
@@ -82,7 +86,11 @@ export default function Perfil({ onLogout }: PerfilProps) {
           name: user.nick,
           photoUrl: user.avatar || "https://i.pravatar.cc/150?img=3",
         });
+        setEditNick(user.nick);
+        setEditAvatar(user.avatar || "");
+
       })
+
       .catch((err) => {
         console.error("Error al obtener usuario:", err);
         navigate("/login");
@@ -108,13 +116,13 @@ export default function Perfil({ onLogout }: PerfilProps) {
       .then(setHistorial)
       .catch(console.error);
 
-    fetch(`/api/usuario/${userId}/logros`, {
+    /*fetch(`/api/usuario/${userId}/logros`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
       .then(setAchievements)
       .catch(console.error);
-
+    */
     fetch(`http://localhost:3001/api/amigos/solicitudes/${userId}`)
       .then((res) => res.json())
       .then(setSolicitudes)
@@ -140,15 +148,41 @@ export default function Perfil({ onLogout }: PerfilProps) {
     const res = await fetch(`http://localhost:3001/api/amigos/solicitud/${amigoId}/aceptar`, {
       method: "POST",
     });
-  
+
     const data = await res.json();
     if (res.ok) {
       setSolicitudes((prev) => prev.filter((s) => s.id !== amigoId));
-      
+
     } else {
       alert("❌ Error al aceptar: " + data.error);
     }
   };
+
+
+  const guardarCambios = async () => {
+    if (!userId) return;
+
+    try {
+      const res = await fetch(`http://localhost:3001/api/usuarios/${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ nick: editNick, avatar: editAvatar }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("✅ Perfil actualizado");
+        setProfile({ name: editNick, photoUrl: editAvatar });
+      } else {
+        alert("❌ Error: " + data.error);
+      }
+    } catch (err) {
+      console.error("Error al actualizar perfil:", err);
+    }
+  };
+
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -171,6 +205,12 @@ export default function Perfil({ onLogout }: PerfilProps) {
         </div>
         <div>
           <p className="text-xl font-semibold">{profile.name}</p>
+          <button
+            onClick={() => navigate(`/editar-perfil`)}
+            className="mt-2 bg-indigo-600 text-white px-3 py-1 rounded"
+          >
+            Editar Perfil
+          </button>
         </div>
       </div>
 
@@ -284,7 +324,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
           <div className="space-y-3">
             {solicitudes.map((s) => (
               <div key={`amigo-${s.id}`}
-              className="flex items-center gap-4">
+                className="flex items-center gap-4">
                 <img
                   src={s.avatar || "https://i.pravatar.cc/150"}
                   className="w-10 h-10 rounded-full object-cover border"

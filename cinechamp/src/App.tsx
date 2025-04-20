@@ -7,6 +7,7 @@ import Perfil from "./pages/private/Perfil";
 import Resultados from "./pages/private/Resultados";
 import UsuarioResultado from "./pages/private/UsuarioResultado";
 import BuscarUsuario from "./pages/private/BuscarUsuario"; 
+import EditarPerfil  from "./pages/private/EditarPerfil";
 
 
 export default function App() {
@@ -65,6 +66,7 @@ export default function App() {
         />
 
         <Route path="/buscar-usuario" element={<BuscarUsuario />} />
+        <Route path="/editar-perfil" element={<EditarPerfil />} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

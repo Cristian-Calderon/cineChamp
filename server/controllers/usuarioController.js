@@ -48,6 +48,17 @@ async function actualizarUsuario(req, res) {
 }
 
 
+async function obtenerUsuarioPorId(req, res) {
+  try {
+    const { id } = req.params;
+    const usuario = await Usuario.obtenerUsuarioPorId(id);
+    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json(usuario);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 // parte de buscdor de usuarios
 
 
@@ -99,5 +110,6 @@ module.exports = {
   login,
   buscarUsuariosPorNick,
   actualizarUsuario,
-  obtenerUsuarioPorNick
+  obtenerUsuarioPorNick,
+  obtenerUsuarioPorId
 };

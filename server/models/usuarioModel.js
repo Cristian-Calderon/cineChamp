@@ -26,13 +26,30 @@ const obtenerUsuarioPorId = async (id) => {
 };
 
 const actualizarUsuario = async (id, nick, avatar) => {
-  const [result] = await db.query(
-    'UPDATE usuario SET nick = ?, avatar = ? WHERE id = ?',
-    [nick, avatar, id]
-  );
+  const campos = [];
+  const valores = [];
+
+  if (nick !== undefined && nick !== "") {
+    campos.push("nick = ?");
+    valores.push(nick);
+  }
+
+  if (avatar !== undefined && avatar !== "") {
+    campos.push("avatar = ?");
+    valores.push(avatar);
+  }
+
+  if (campos.length === 0) {
+    // Nada que actualizar
+    return 0;
+  }
+
+  const query = `UPDATE usuario SET ${campos.join(", ")} WHERE id = ?`;
+  valores.push(id); // Agrega el ID al final
+
+  const [result] = await db.query(query, valores);
   return result.affectedRows;
 };
-
 const eliminarUsuario = async (id) => {
   const [result] = await db.query('DELETE FROM usuario WHERE id = ?', [id]);
   return result.affectedRows;
