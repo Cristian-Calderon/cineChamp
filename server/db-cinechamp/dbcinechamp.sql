@@ -107,18 +107,19 @@ CREATE TABLE calificacion (
     CONSTRAINT unique_calificacion UNIQUE (id_usuario, id_biblioteca)
 );
 
-
--- Tabla d contenido 
-CREATE TABLE `contenido_guardado` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `id_usuario` INT NOT NULL,
-  `id_api` INT NOT NULL,
-  `tipo` ENUM('pelicula','serie') NOT NULL,
-  `fecha_guardado` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `id_usuario` (`id_usuario`),
-  CONSTRAINT `contenido_guardado_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id`)
+-- Tabla contenido
+CREATE TABLE contenido_guardado (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_api INT NOT NULL,
+    tipo ENUM('pelicula', 'serie') NOT NULL,
+    fecha_guardado TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT contenido_guardado_ibfk_1 FOREIGN KEY (id_usuario) REFERENCES usuario(id) ON DELETE CASCADE,
+    KEY id_usuario (id_usuario)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+
 
 --tabla favoritos
 CREATE TABLE `favoritos` (
