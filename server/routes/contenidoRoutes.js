@@ -3,8 +3,7 @@ const express = require('express');
 const router = express.Router();
 const {
   verificarConexionAPI,
-  buscarPeliculasController,
-  buscarSeriesController,
+  buscarContenidoController,
   favoritoContenidoController,
   agregarContenidoController,
   buscarAPI,
@@ -17,8 +16,7 @@ const {
 router.get('/check-api', verificarConexionAPI);
 
 // Búsquedas
-router.get('/buscar-peliculas', buscarPeliculasController);
-router.get('/buscar-series', buscarSeriesController);
+router.get('/bContenido', buscarContenidoController);
 router.get('/buscar', buscarAPI); 
 
 

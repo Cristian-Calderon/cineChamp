@@ -6,8 +6,9 @@ import Home from "./pages/private/Home/Home"; // Ejemplo de vista principal
 import Perfil from "./pages/private/Perfil";
 import Resultados from "./pages/private/Resultados";
 import UsuarioResultado from "./pages/private/UsuarioResultado";
-import BuscarUsuario from "./pages/private/BuscarUsuario"; 
-import EditarPerfil  from "./pages/private/EditarPerfil";
+import BuscarUsuario from "./pages/private/BuscarUsuario";
+import EditarPerfil from "./pages/private/EditarPerfil";
+import ListaContenido from "./pages/private/ListaContenido";
 
 
 export default function App() {
@@ -67,6 +68,9 @@ export default function App() {
 
         <Route path="/buscar-usuario" element={<BuscarUsuario />} />
         <Route path="/editar-perfil" element={<EditarPerfil />} />
+
+        <Route path="/uFavoritos/:userId" element={<ListaContenido />} />
+        <Route path="/uHistorial/:userId" element={<ListaContenido />} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

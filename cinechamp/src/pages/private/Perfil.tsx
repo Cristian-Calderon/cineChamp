@@ -6,6 +6,7 @@ type Movie = {
   id: number;
   title: string;
   posterUrl: string;
+  media_type: "movie" | "tv";
 };
 
 type Profile = {
@@ -216,7 +217,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
 
       {/* Favoritos */}
       <div className="border rounded-xl p-4 shadow-md mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Películas Favoritas</h2>
+        <h2 className="text-2xl font-semibold mb-4">Favoritos</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
           {favorites.map((movie) => (
             <div key={movie.id} className="border rounded shadow-sm overflow-hidden">
@@ -225,15 +226,30 @@ export default function Perfil({ onLogout }: PerfilProps) {
                 alt={movie.title}
                 className="w-full h-48 object-cover"
               />
-              <p className="text-sm text-center p-1">{movie.title}</p>
+              <div className="p-2 text-center">
+                <p className="text-sm font-medium">{movie.title}</p>
+                <p className="text-xs text-blue-600 mt-1">
+                  {movie.media_type === "movie" ? "🎬 Película" : "📺 Serie"}
+                </p>
+              </div>
             </div>
           ))}
         </div>
+
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => navigate(`/uFavoritos/${userId}`)}
+            className="text-blue-600 underline text-sm hover:text-blue-800"
+          >
+            Ver más →
+          </button>
+        </div>
       </div>
+      
 
       {/* Historial */}
       <div className="border rounded-xl p-4 shadow-md mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Historial de Películas</h2>
+        <h2 className="text-2xl font-semibold mb-4">Historial</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
           {historial.map((movie) => (
             <div key={movie.id} className="border rounded shadow-sm overflow-hidden">
@@ -242,9 +258,24 @@ export default function Perfil({ onLogout }: PerfilProps) {
                 alt={movie.title}
                 className="w-full h-48 object-cover"
               />
-              <p className="text-sm text-center p-1">{movie.title}</p>
+              <div className="p-2 text-center">
+                <p className="text-sm font-medium">{movie.title}</p>
+                <p className="text-xs text-blue-600 mt-1">
+                  {movie.media_type === "movie" ? "🎬 Película" : "📺 Serie"}
+                </p>
+              </div>
             </div>
           ))}
+        </div>
+
+        {/* Botón "Ver más" */}
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => navigate(`/uHistorial/${userId}`)}
+            className="text-blue-600 underline text-sm hover:text-blue-800"
+          >
+            Ver más →
+          </button>
         </div>
       </div>
 

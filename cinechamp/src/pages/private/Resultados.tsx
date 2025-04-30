@@ -26,7 +26,7 @@ export default function Resultados() {
     const buscar = async () => {
       if (!query) return;
       try {
-        const res = await fetch(`http://localhost:3001/contenido/buscar-peliculas?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`http://localhost:3001/contenido/bContenido?q=${encodeURIComponent(query)}`);
 
         const data = await res.json();
         console.log("🔎 Resultados desde backend:", data);
@@ -61,15 +61,15 @@ export default function Resultados() {
         id_tmdb: movie.id
       }),
     });
-  
+
     const data = await response.json();
     console.log("✅ Backend respondió:", data);
-  
+
     if (!response.ok) {
       console.log("⚠️ Error al agregar favorito: " + data.error);
     }
   };
- 
+
   // Historial de las peliculas que hemos visto:
   const agregarHistorial = async (movie: Movie) => {
     const userId = parseInt(localStorage.getItem("userId") || "0");
@@ -80,7 +80,7 @@ export default function Resultados() {
       id_api: movie.id
     });
 
-    const response = await fetch("http://localhost:3001/contenido/agregar",  {
+    const response = await fetch("http://localhost:3001/contenido/agregar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -89,11 +89,11 @@ export default function Resultados() {
       }),
     });
 
-    
+
     console.log("Se agrego al historial");
   };
 
-  
+
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
@@ -121,6 +121,9 @@ export default function Resultados() {
               <p className="text-sm font-semibold">{movie.title || movie.name}</p>
               <p className="text-xs text-gray-500">
                 {movie.release_date || movie.first_air_date || "Sin fecha"}
+              </p>
+              <p className="text-xs text-blue-600 font-medium">
+                {movie.media_type === "movie" ? "Película" : "Serie"}
               </p>
               <div className="flex flex-col gap-2 mt-2">
                 <button

@@ -31,18 +31,23 @@ const verificarConexionAPI = async (req, res) => {
   }
 };
 
-const buscarPeliculasController = async (req, res) => {
-  const query = req.query.q;
-  const resultados = await buscarContenido(query); 
-  res.json(resultados);
 
-};
-
-const buscarSeriesController = async (req, res) => {
+const buscarContenidoController = async (req, res) => {
   const query = req.query.q;
-  const resultados = await buscarSeries(query);
-  res.json(resultados);
-};
+
+  try {
+    const peliculas = await buscarContenido(query);
+    const series = await buscarSeries(query);
+    
+    const resultados = [...peliculas, ...series];
+    res.json(resultados);
+  } catch (error) {
+    console.error("Error al buscar contenido:", error);
+    res.status(500).json({ error: "Error al buscar contenido" });
+  }
+}
+
+
 
 const agregarContenidoController = async (req, res) => {
   const { id_usuario, id_api } = req.body;
@@ -185,8 +190,7 @@ const obtenerHistorialPorUsuario = async (req, res) => {
 module.exports = {
   buscarAPI,
   verificarConexionAPI,
-  buscarPeliculasController,
-  buscarSeriesController,
+  buscarContenidoController,
   favoritoContenidoController,
   agregarContenidoController,
   obtenerHistorialPorUsuario,
