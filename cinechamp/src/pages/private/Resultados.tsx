@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 
 //definimos el tipo de pelicula que esperamos
@@ -14,6 +14,7 @@ type Movie = {
 };
 
 export default function Resultados() {
+  const { nick } = useParams<{ nick: string }>();
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
@@ -145,12 +146,12 @@ export default function Resultados() {
       )}
 
       <div className="mt-8 text-center">
-        <button
-          onClick={() => navigate("/perfil")}
+        <Link
+          to={`/id/${nick}`}
           className="text-blue-600 underline text-sm"
         >
-          ← Volver al perfil
-        </button>
+          ← Volver al perfil de {nick}
+        </Link>
       </div>
     </div>
   );

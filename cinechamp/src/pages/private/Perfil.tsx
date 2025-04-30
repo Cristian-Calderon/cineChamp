@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Outlet } from "react-router-dom";
 import axios from "axios";
 
 type Movie = {
@@ -136,8 +136,8 @@ export default function Perfil({ onLogout }: PerfilProps) {
   }, [userId]);
 
   const buscarPeliculas = () => {
-    if (!query) return;
-    navigate(`/resultados?q=${encodeURIComponent(query)}`);
+    if (!query || !nick) return;
+    navigate(`/id/${nick}/resultados?q=${encodeURIComponent(query)}`);
   };
 
   const buscarAmigo = () => {
@@ -393,6 +393,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
           </div>
         )}
       </div>
+      
     </div>
   );
 }

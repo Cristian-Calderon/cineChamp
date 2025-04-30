@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/auth/Login/Login";
 import Register from "./pages/auth/Register/Register";
-import Home from "./pages/private/Home/Home"; // Ejemplo de vista principal
+
 import Perfil from "./pages/private/Perfil";
 import Resultados from "./pages/private/Resultados";
 import UsuarioResultado from "./pages/private/UsuarioResultado";
@@ -10,10 +10,23 @@ import BuscarUsuario from "./pages/private/BuscarUsuario";
 import EditarPerfil from "./pages/private/EditarPerfil";
 import ListaContenido from "./pages/private/ListaContenido";
 
+// Verificar ruta /
+function HomeRedirect() {
+  const token = localStorage.getItem("token");
+  const nick = localStorage.getItem("nick"); // asegúrate de guardarlo al hacer login
+  if (token && nick) {
+    return <Navigate to={`/id/${nick}`} replace />;
+  } else {
+    return <Navigate to="/login" replace />;
+  }
+}
+
+
 
 export default function App() {
   // El token ya se lee directamente desde localStorage al iniciar
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("token"));
+
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -25,13 +38,10 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={
-            token ? <Home onLogout={handleLogout} /> : <Navigate to="/login" />
-          }
-        />
 
+        {/* ruta raíz: envía a login o, si ya estás, a tu perfil */}
+        <Route path="/" element={<HomeRedirect />} />
+        
         <Route
           path="/login"
           element={<Login setToken={setToken} />}
@@ -55,7 +65,7 @@ export default function App() {
 
 
         <Route
-          path="/resultados"
+          path="/id/:nick/resultados"
           element={
             token ? <Resultados /> : <Navigate to="/login" />
           }
