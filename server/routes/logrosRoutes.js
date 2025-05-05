@@ -5,13 +5,7 @@ const {
   asignarLogroSiNoExiste
 } = require('../controllers/logrosController');
 
-// Obtener logros desbloqueados
-router.get('/usuario/:username/logros', obtenerLogrosPorUsuario);
-
-// Desbloquear un logro
-router.post('/usuario/:username/logros', asignarLogroSiNoExiste);
-
-
-
+router.get('/:username', obtenerLogrosPorUsuario);
+router.post('/:username', asignarLogroSiNoExiste);
 
 module.exports = router;

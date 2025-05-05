@@ -24,7 +24,7 @@ const logroPrimerFavorito = {
 };
 
 const logro5Favoritos = {
-  id: 2,
+  id: 21,
   async evaluar(usuarioId) {
     const [yaTiene] = await db.query(
       'SELECT * FROM usuario_logros WHERE usuario_id = ? AND logro_id = ?',

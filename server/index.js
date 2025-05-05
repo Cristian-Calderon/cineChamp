@@ -5,9 +5,13 @@ const db = require('./models/db.js');
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const contenidoRoutes = require('./routes/contenidoRoutes');
 const logrosRoutes = require('./routes/logrosRoutes');
+const path = require('path');
 
 const app = express();
 app.use(express.static('public'));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+
 
 app.use(cors());
 app.use(express.json());

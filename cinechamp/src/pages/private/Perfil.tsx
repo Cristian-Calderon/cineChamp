@@ -1,87 +1,42 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, Outlet } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
-type Movie = {
-  id: number;
-  title: string;
-  posterUrl: string;
-  media_type: "movie" | "tv";
-};
+// Tipos
+// ... (mismos que ya definiste arriba)
 
-type Profile = {
-  name: string;
-  photoUrl: string;
-};
-
-type Achievement = {
-  id: number;
-  title: string;
-  description: string;
-  imageUrl: string;
-};
-
-type UserResponse = {
-  id: number;
-  nick: string;
-  avatar?: string;
-};
-
-type Solicitud = {
-  id: number;
-  usuario_id: number;
-  nick: string;
-  avatar: string;
-}
-
-type Amigo = {
-  id: number;
-  nick: string;
-  avatar: string;
-};
-
-interface PerfilProps {
-  onLogout: () => void;
-}
-
-export default function Perfil({ onLogout }: PerfilProps) {
+export default function Perfil({ onLogout }) {
   const { nick } = useParams();
   const navigate = useNavigate();
 
-  const [profile, setProfile] = useState<Profile>({ name: "", photoUrl: "" });
-  const [favorites, setFavorites] = useState<Movie[]>([]);
-  const [historial, setHistorial] = useState<Movie[]>([]);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [profile, setProfile] = useState({ name: "", photoUrl: "" });
+  const [favorites, setFavorites] = useState<{ id: number; posterUrl: string; title: string; media_type: string }[]>([]);
+  const [historial, setHistorial] = useState([]);
+  const [achievements, setAchievements] = useState([]);
   const [query, setQuery] = useState("");
   const [nickAmigo, setNickAmigo] = useState("");
   const [userId, setUserId] = useState<number | null>(null);
-
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
-  const [amigos, setAmigos] = useState<Amigo[]>([]);
-
+  const [amigos, setAmigos] = useState<{ id: number; nick: string; avatar?: string }[]>([]);
   const [editNick, setEditNick] = useState("");
   const [editAvatar, setEditAvatar] = useState("");
 
-
   const goHome = () => navigate("/");
 
-  // Redirigir si no hay token
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) navigate("/login");
   }, [navigate]);
 
-  // Obtener usuario por nick
   useEffect(() => {
     if (!nick) return;
     const token = localStorage.getItem("token");
 
-    axios
-      .get<UserResponse>(`http://localhost:3001/api/usuarios/nick/${nick}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    axios.get(`http://localhost:3001/api/usuarios/nick/${nick}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then((res) => {
-        const user = res.data;
+        const user = res.data as { id: number; nick: string; avatar?: string };
         setUserId(user.id);
         setProfile({
           name: user.nick,
@@ -89,19 +44,31 @@ export default function Perfil({ onLogout }: PerfilProps) {
         });
         setEditNick(user.nick);
         setEditAvatar(user.avatar || "");
-
       })
-
       .catch((err) => {
         console.error("Error al obtener usuario:", err);
         navigate("/login");
       });
   }, [nick, navigate]);
 
-  // Obtener favoritos, historial, logros, amigos y solicitudes
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!userId || !token) return;
+
+    fetch(`http://localhost:3001/api/logros/verificar/${userId}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then(data => console.log("✅ Logros verificados:", data))
+      .catch(err => console.error("❌ Error al verificar logros:", err));
+
+    fetch(`http://localhost:3001/api/logros/${profile.name}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then(setAchievements)
+      .catch(console.error);
 
     fetch(`/api/contenido/favoritos/${userId}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -117,13 +84,6 @@ export default function Perfil({ onLogout }: PerfilProps) {
       .then(setHistorial)
       .catch(console.error);
 
-    /*fetch(`/api/usuario/${userId}/logros`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then(setAchievements)
-      .catch(console.error);
-    */
     fetch(`http://localhost:3001/api/amigos/solicitudes/${userId}`)
       .then((res) => res.json())
       .then(setSolicitudes)
@@ -133,7 +93,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
       .then((res) => res.json())
       .then(setAmigos)
       .catch(console.error);
-  }, [userId]);
+  }, [userId, profile.name]);
 
   const buscarPeliculas = () => {
     if (!query || !nick) return;
@@ -145,33 +105,32 @@ export default function Perfil({ onLogout }: PerfilProps) {
     navigate(`/usuario/resultado?nick=${encodeURIComponent(nickAmigo)}`);
   };
 
-  const aceptarSolicitud = async (amigoId: number) => {
+  interface Solicitud {
+    id: number;
+    nick: string;
+    avatar?: string;
+  }
+
+  const aceptarSolicitud = async (amigoId: number): Promise<void> => {
     const res = await fetch(`http://localhost:3001/api/amigos/solicitud/${amigoId}/aceptar`, {
       method: "POST",
     });
-
-    const data = await res.json();
+    const data: { error?: string } = await res.json();
     if (res.ok) {
-      setSolicitudes((prev) => prev.filter((s) => s.id !== amigoId));
-
+      setSolicitudes((prev: Solicitud[]) => prev.filter((s) => s.id !== amigoId));
     } else {
       alert("❌ Error al aceptar: " + data.error);
     }
   };
 
-
   const guardarCambios = async () => {
     if (!userId) return;
-
     try {
       const res = await fetch(`http://localhost:3001/api/usuarios/${userId}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nick: editNick, avatar: editAvatar }),
       });
-
       const data = await res.json();
       if (res.ok) {
         alert("✅ Perfil actualizado");
@@ -183,7 +142,6 @@ export default function Perfil({ onLogout }: PerfilProps) {
       console.error("Error al actualizar perfil:", err);
     }
   };
-
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -235,48 +193,6 @@ export default function Perfil({ onLogout }: PerfilProps) {
             </div>
           ))}
         </div>
-
-        <div className="mt-4 text-center">
-          <button
-            onClick={() => navigate(`/uFavoritos/${userId}`)}
-            className="text-blue-600 underline text-sm hover:text-blue-800"
-          >
-            Ver más →
-          </button>
-        </div>
-      </div>
-      
-
-      {/* Historial */}
-      <div className="border rounded-xl p-4 shadow-md mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Historial</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
-          {historial.map((movie) => (
-            <div key={movie.id} className="border rounded shadow-sm overflow-hidden">
-              <img
-                src={movie.posterUrl}
-                alt={movie.title}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-2 text-center">
-                <p className="text-sm font-medium">{movie.title}</p>
-                <p className="text-xs text-blue-600 mt-1">
-                  {movie.media_type === "movie" ? "🎬 Película" : "📺 Serie"}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Botón "Ver más" */}
-        <div className="mt-4 text-center">
-          <button
-            onClick={() => navigate(`/uHistorial/${userId}`)}
-            className="text-blue-600 underline text-sm hover:text-blue-800"
-          >
-            Ver más →
-          </button>
-        </div>
       </div>
 
       {/* Logros */}
@@ -286,11 +202,11 @@ export default function Perfil({ onLogout }: PerfilProps) {
           {achievements.map((logro) => (
             <div
               key={logro.id}
-              className="w-20 flex flex-col items-center text-center tooltip"
+              className="w-20 flex flex-col items-center text-center"
               title={`${logro.title} - ${logro.description}`}
             >
               <img
-                src={logro.imageUrl}
+                src={logro.image_url}
                 alt={logro.title}
                 className="w-[40px] h-[40px] object-contain border rounded shadow-md"
               />
@@ -354,8 +270,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
         ) : (
           <div className="space-y-3">
             {solicitudes.map((s) => (
-              <div key={`amigo-${s.id}`}
-                className="flex items-center gap-4">
+              <div key={`amigo-${s.id}`} className="flex items-center gap-4">
                 <img
                   src={s.avatar || "https://i.pravatar.cc/150"}
                   className="w-10 h-10 rounded-full object-cover border"
@@ -393,7 +308,6 @@ export default function Perfil({ onLogout }: PerfilProps) {
           </div>
         )}
       </div>
-      
     </div>
   );
 }
