@@ -6,6 +6,9 @@ const usuarioRoutes = require('./routes/usuarioRoutes');
 const contenidoRoutes = require('./routes/contenidoRoutes');
 const logrosRoutes = require('./routes/logrosRoutes');
 const path = require('path');
+const { verificarLogros } = require('./controllers/logrosController.js');
+
+
 
 const app = express();
 app.use(express.static('public'));
@@ -45,3 +48,9 @@ app.listen(PORT, () => {
 //parte social/amigos
 const amigosRoutes = require('./routes/socialRoutes');
 app.use('/api/amigos', amigosRoutes);
+
+app.get('/api/logros/forzar/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  await verificarLogros(id);
+  res.send(`Verificación forzada para usuario ${id}`);
+});

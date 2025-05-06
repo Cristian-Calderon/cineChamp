@@ -6,7 +6,13 @@ type Resultado = {
   name?: string;
 };
 
-export default function Search() {
+type SearchProps = {
+  userId: number;
+};
+
+
+
+export default function Search({ userId }: SearchProps) {
   //Guarda lo que el usuario escribe en el input de búsqueda.
   const [peticionUsuario, setQuery] = useState('');
   //Guarda los resultados de películas y series por separado.
@@ -60,20 +66,23 @@ export default function Search() {
   };
 
   const agregarElemento = async (item: Resultado) => {
-    if (agregados.includes(item.id)) return;
-  
-    try {
-      await fetch('http://localhost:3001/contenido/agregar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item),
-      });
-      setAgregados([...agregados, item.id]);
-      alert('✅ Agregado correctamente');
-    } catch (error) {
-      console.error('Error al agregar:', error);
-    }
-  };
+  if (agregados.includes(item.id)) return;
+
+  try {
+    await fetch('http://localhost:3001/contenido/agregar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id_usuario: userId,
+        id_api: item.id,
+      }),
+    });
+    setAgregados([...agregados, item.id]);
+    alert('✅ Agregado correctamente');
+  } catch (error) {
+    console.error('Error al agregar:', error);
+  }
+};
   
 
   const renderItem = (item: Resultado) => (

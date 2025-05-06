@@ -132,3 +132,32 @@ CREATE TABLE `favoritos` (
   UNIQUE KEY `id_usuario` (`id_usuario`, `id_tmdb`),
   CONSTRAINT `favoritos_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- Logros 
+CREATE TABLE `logros` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `codigo` VARCHAR(100) DEFAULT NULL,
+  `title` VARCHAR(100) DEFAULT NULL,
+  `description` TEXT DEFAULT NULL,
+  `image_url` VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `codigo` (`codigo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+
+
+-- usuario_logros
+
+CREATE TABLE `usuario_logros` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `usuario_id` INT DEFAULT NULL,
+  `logro_id` INT DEFAULT NULL,
+  `fecha` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `usuario_id` (`usuario_id`),
+  KEY `logro_id` (`logro_id`),
+  CONSTRAINT `usuario_logros_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuario` (`id`),
+  CONSTRAINT `usuario_logros_ibfk_2` FOREIGN KEY (`logro_id`) REFERENCES `logros` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

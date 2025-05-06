@@ -66,11 +66,10 @@ const verificarLogros = async (id_usuario) => {
     );
 
     const vistas = vistasResult[0].total;
-
+    console.log(`🎞️ Películas vistas por el usuario ${id_usuario}: ${vistas}`);
     const logrosPorVistas = [
-      { id: 1, minimo: 10 },   // Fundadores
-      { id: 9, minimo: 50 },   // Entendido
-      { id: 10, minimo: 100 }, // El Bicho
+      { id: 9, minimo: 25 },   // Entendido
+      { id: 10, minimo: 55 }, // El Bicho
       { id: 11, minimo: 150 }, // Soldado Oscuro
       { id: 12, minimo: 200 }, // Me gusta el cine
       { id: 16, minimo: 300 }, // No puedo parar
@@ -85,7 +84,7 @@ const verificarLogros = async (id_usuario) => {
         await asignarLogro(id_usuario, logro.id);
       }
     }
-
+    console.log(`🎞️ Películas vistas por el usuario ${id_usuario}: ${vistas}`);
   } catch (error) {
     console.error("Error al verificar logros:", error);
   }

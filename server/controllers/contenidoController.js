@@ -121,8 +121,8 @@ const favoritoContenidoController = async (req, res) => {
       [id_usuario, id_tmdb, titulo]
     );
 
-    // 4. Verificamos logros automáticamente
-    //await verificarLogros(id_usuario);
+   
+    await verificarLogros(id_usuario);
 
     res.status(201).json({ message: `${tipo === 'pelicula' ? 'Película' : 'Serie'} marcada como favorita: ${titulo}` });
   } catch (error) {
@@ -135,19 +135,26 @@ const obtenerFavoritosPorUsuario = async (req, res) => {
   const { id_usuario } = req.params;
 
   try {
-    //devulve a el usuario las que marco en favoritos(solo nos devulve un id de tmdb)
     const [favoritos] = await db.query(
       'SELECT id_tmdb FROM favoritos WHERE id_usuario = ?',
       [id_usuario]
     );
-    //por cada id guardado llama a a la api
+
     const resultados = await Promise.all(
       favoritos.map(async ({ id_tmdb }) => {
-        const data = await obtenerDetallesPorId(id_tmdb, 'movie');
+        let data = await obtenerDetallesPorId(id_tmdb, 'movie');
+        let tipo = 'movie';
+
+        if (!data || data.success === false) {
+          data = await obtenerDetallesPorId(id_tmdb, 'tv');
+          tipo = 'tv';
+        }
+
         return {
           id: id_tmdb,
-          title: data?.title,
-          posterUrl: `https://image.tmdb.org/t/p/w500${data?.poster_path}`
+          title: data?.title || data?.name,
+          posterUrl: `https://image.tmdb.org/t/p/w500${data?.poster_path}`,
+          media_type: tipo
         };
       })
     );
@@ -175,7 +182,8 @@ const obtenerHistorialPorUsuario = async (req, res) => {
         return {
           id: id_api,
           title: data?.title || data?.name,
-          posterUrl: `https://image.tmdb.org/t/p/w500${data?.poster_path}`
+          posterUrl: `https://image.tmdb.org/t/p/w500${data?.poster_path}`,
+          media_type: tipo === 'pelicula' ? 'movie' : 'tv'
         };
       })
     );
