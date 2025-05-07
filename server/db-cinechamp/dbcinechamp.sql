@@ -161,3 +161,21 @@ CREATE TABLE `usuario_logros` (
   CONSTRAINT `usuario_logros_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuario` (`id`),
   CONSTRAINT `usuario_logros_ibfk_2` FOREIGN KEY (`logro_id`) REFERENCES `logros` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO logros (id, clave, titulo, descripcion, imagen_url) VALUES
+(1, 'logro_usuario', 'Fundadores', 'Primeros 10 registrados', 'http://localhost:3001/assets/fundadores.png'),
+(3, 'logro_usuario1', 'Soñadores', 'Primeros 100 registrados', 'http://localhost:3001/assets/soñador.png'),
+(4, 'logro_usuario2', 'Creadores', 'Primeros 250 registrados', 'http://localhost:3001/assets/credores.png'),
+(5, 'logro_usuario3', 'Suertudos', 'Primeros 600 registrados', 'http://localhost:3001/assets/suertudo.png'),
+(6, 'logro_usuario4', 'Unicos', 'Primeros 1000 registrados', 'http://localhost:3001/assets/unicos.png'),
+(8, 'logro_usuario5', 'Nuevo Freak', '10 películas vistas', 'http://localhost:3001/assets/Freak.png'),
+(9, 'logro_usuario6', 'Entendido', '25 películas vistas', 'http://localhost:3001/assets/entendido.png'),
+(10, 'logro_usuario7', 'El_bicho', '55 películas vistas', 'http://localhost:3001/assets/Elbicho.png'),
+(11, 'logro_usuario8', 'Soldado_Oscuro', '70 películas vistas', 'http://localhost:3001/assets/SoldadoOscuro.png'),
+(12, 'logro_usuario9', 'Me_gusta_cine', '80 películas vistas', 'http://localhost:3001/assets/megustaElCine.png'),
+(16, 'logro_usuario10', 'No puedo parar', '300 películas vistas', 'http://localhost:3001/assets/NopuedoParar.png'),
+(17, 'logro_usuario11', 'No veo la Luz', '400 películas vistas', 'http://localhost:3001/assets/noVeolaLuz.png'),
+(18, 'logro_usuario12', 'Necesito ver más', '500 películas vistas', 'http://localhost:3001/assets/necesitoverMas.png'),
+(19, 'logro_usuario13', 'Indomable', '600 películas vistas', 'http://localhost:3001/assets/indomable.png'),
+(20, 'logro_usuario14', 'Freak', '700 películas vistas', 'http://localhost:3001/assets/Freak.png'),
+(21, 'logro_favorito', 'Primer Favorito', 'Has agregado tu primer favorito', 'http://localhost:3001/assets/primero.png');
