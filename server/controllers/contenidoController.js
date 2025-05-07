@@ -81,6 +81,7 @@ const agregarContenidoController = async (req, res) => {
 
     // 4. Verificar logros
     await verificarLogros(id_usuario);
+    
 
     res.status(201).json({ message: `${tipo === 'pelicula' ? 'Película' : 'Serie'} agregada correctamente.` });
   } catch (error) {

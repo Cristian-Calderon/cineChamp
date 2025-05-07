@@ -90,8 +90,16 @@ export default function Resultados() {
       }),
     });
 
+    const data = await response.json();
+    console.log("✅ Respuesta del backend:", data);
 
-    console.log("Se agrego al historial");
+    // 🔁 Recargar logros desde el backend
+    if (nick) {
+      console.log("📥 Ejecutando carga de logros...");
+      await fetch(`http://localhost:3001/api/logros/${nick}`);
+    }
+
+    console.log("Se agregó al historial");
   };
 
 
@@ -147,7 +155,7 @@ export default function Resultados() {
 
       <div className="mt-8 text-center">
         <Link
-          to={`/id/${nick}`}
+          to={`/id/${nick}?refrescar=1`} 
           className="text-blue-600 underline text-sm"
         >
           ← Volver al perfil de {nick}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
+import Search from "./Search";
 
 type Movie = {
   id: number;
@@ -46,6 +47,7 @@ interface PerfilProps {
 
 export default function Perfil({ onLogout }: PerfilProps) {
   const { nick } = useParams();
+  const location = useLocation(); // 👈 para detectar query param
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState<Profile>({ name: "", photoUrl: "" });
@@ -117,13 +119,6 @@ export default function Perfil({ onLogout }: PerfilProps) {
       })
       .catch(console.error);
 
-    fetch(`http://localhost:3001/api/logros/${profile.name}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then(setAchievements)
-      .catch(console.error);
-
     fetch(`http://localhost:3001/api/amigos/solicitudes/${userId}`)
       .then((res) => res.json())
       .then(setSolicitudes)
@@ -133,7 +128,38 @@ export default function Perfil({ onLogout }: PerfilProps) {
       .then((res) => res.json())
       .then(setAmigos)
       .catch(console.error);
-  }, [userId, profile.name]);
+  }, [userId]);
+
+  const cargarLogros = async () => {
+    const token = localStorage.getItem("token");
+    if (!nick || !token || !userId) return;
+  
+    try {
+      // 🧠 Primero forza verificación
+      await fetch(`http://localhost:3001/api/logros/forzar/${userId}`);
+  
+      // 📥 Luego carga los logros actualizados
+      const res = await fetch(`http://localhost:3001/api/logros/${nick}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      const nuevos = await res.json();
+      setAchievements(nuevos);
+    } catch (err) {
+      console.error("Error al cargar logros:", err);
+    }
+  };
+  
+
+  // ✅ Cargar logros al inicio Y si ?refrescar=1 está en la URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const necesitaRecarga = params.get("refrescar") === "1";
+    if (necesitaRecarga) {
+      console.log("🔁 Refrescando logros por query param");
+    }
+    cargarLogros();
+  }, [nick,userId, location.search]);
 
   const buscarPeliculas = () => {
     if (!query || !nick) return;
@@ -164,6 +190,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
   };
 
   return (
+
     <div className="p-6 w-full">
       <h1 className="text-3xl font-bold mb-6">CineChamp</h1>
 
@@ -255,6 +282,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
           ))}
         </div>
 
+       
         {/* Derecha: Logros y Amigos */}
         <div className="w-full lg:w-1/2 flex flex-col gap-6">
           <div className="border rounded-xl p-4 shadow-md">
@@ -268,6 +296,8 @@ export default function Perfil({ onLogout }: PerfilProps) {
               ))}
             </div>
           </div>
+
+              
 
           <div className="border rounded-xl p-4 shadow-md">
             <h2 className="text-2xl font-semibold mb-4">Mis Amigos</h2>

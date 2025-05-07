@@ -8,11 +8,12 @@ type Resultado = {
 
 type SearchProps = {
   userId: number;
+  cargarLogros?: () => void;
 };
 
 
 
-export default function Search({ userId }: SearchProps) {
+export default function Search({ userId, cargarLogros }: SearchProps) {
   //Guarda lo que el usuario escribe en el input de búsqueda.
   const [peticionUsuario, setQuery] = useState('');
   //Guarda los resultados de películas y series por separado.
@@ -66,23 +67,37 @@ export default function Search({ userId }: SearchProps) {
   };
 
   const agregarElemento = async (item: Resultado) => {
-  if (agregados.includes(item.id)) return;
-
-  try {
-    await fetch('http://localhost:3001/contenido/agregar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id_usuario: userId,
-        id_api: item.id,
-      }),
-    });
-    setAgregados([...agregados, item.id]);
-    alert('✅ Agregado correctamente');
-  } catch (error) {
-    console.error('Error al agregar:', error);
-  }
-};
+    if (agregados.includes(item.id)) return;
+  
+    console.log("🧑‍💻 ID del usuario:", userId);
+    console.log("🛰️ Enviando a backend:", { id_usuario: userId, id_api: item.id });
+  
+    try {
+      const res = await fetch('http://localhost:3001/contenido/agregar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_usuario: userId,
+          id_api: item.id,
+        }),
+      });
+  
+      const data = await res.json();
+      console.log("✅ Respuesta del backend:", data);
+  
+      setAgregados([...agregados, item.id]);
+      alert('✅ Agregado correctamente');
+  
+      if (cargarLogros) {
+        console.log("🔄 Ejecutando cargarLogros...");
+        await cargarLogros(); // <<<< Asegura que esto se ejecute
+      }
+    } catch (error) {
+      console.error('❌ Error al agregar:', error);
+    }
+  };
+  
+  
   
 
   const renderItem = (item: Resultado) => (
