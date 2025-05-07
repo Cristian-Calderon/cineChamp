@@ -41,7 +41,7 @@ export default function App() {
 
         {/* ruta raíz: envía a login o, si ya estás, a tu perfil */}
         <Route path="/" element={<HomeRedirect />} />
-        
+
         <Route
           path="/login"
           element={<Login setToken={setToken} />}
@@ -78,9 +78,14 @@ export default function App() {
 
         <Route path="/buscar-usuario" element={<BuscarUsuario />} />
         <Route path="/editar-perfil" element={<EditarPerfil />} />
-
+        {/* 
         <Route path="/uFavoritos/:userId" element={<ListaContenido />} />
-        <Route path="/uHistorial/:userId" element={<ListaContenido />} />
+        <Route path="/uHistorial/:userId" element={<ListaContenido />} /> */}
+
+
+        <Route path="/usuario/:nick/lista/:section/:media_type"
+          element={token ? <ListaContenido /> : <Navigate to="/login" replace />} 
+          />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

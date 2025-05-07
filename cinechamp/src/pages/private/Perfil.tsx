@@ -133,23 +133,23 @@ export default function Perfil({ onLogout }: PerfilProps) {
   const cargarLogros = async () => {
     const token = localStorage.getItem("token");
     if (!nick || !token || !userId) return;
-  
+
     try {
       // 🧠 Primero forza verificación
       await fetch(`http://localhost:3001/api/logros/forzar/${userId}`);
-  
+
       // 📥 Luego carga los logros actualizados
       const res = await fetch(`http://localhost:3001/api/logros/${nick}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       const nuevos = await res.json();
       setAchievements(nuevos);
     } catch (err) {
       console.error("Error al cargar logros:", err);
     }
   };
-  
+
 
   // ✅ Cargar logros al inicio Y si ?refrescar=1 está en la URL
   useEffect(() => {
@@ -159,7 +159,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
       console.log("🔁 Refrescando logros por query param");
     }
     cargarLogros();
-  }, [nick,userId, location.search]);
+  }, [nick, userId, location.search]);
 
   const buscarPeliculas = () => {
     if (!query || !nick) return;
@@ -253,7 +253,15 @@ export default function Perfil({ onLogout }: PerfilProps) {
                 ))}
               </div>
               <div className="mt-2 text-right">
-                <button className="text-blue-600 text-sm hover:underline">Ver más →</button>
+                     <button
+                  onClick={() =>
+                    navigate(`/usuario/${nick}/lista/favoritos/${type}`)
+                  }
+                  className="text-blue-600 text-sm hover:underline"
+                >
+                  Ver más →
+                </button>
+
               </div>
             </div>
           ))}
@@ -276,13 +284,20 @@ export default function Perfil({ onLogout }: PerfilProps) {
                 ))}
               </div>
               <div className="mt-2 text-right">
-                <button className="text-blue-600 text-sm hover:underline">Ver más →</button>
+                    <button
+                  onClick={() =>
+                    navigate(`/usuario/${nick}/lista/historial/${type}`)
+                  }
+                  className="text-blue-600 text-sm hover:underline"
+                >
+                  Ver más →
+                </button>
               </div>
             </div>
           ))}
         </div>
 
-       
+
         {/* Derecha: Logros y Amigos */}
         <div className="w-full lg:w-1/2 flex flex-col gap-6">
           <div className="border rounded-xl p-4 shadow-md">
@@ -297,7 +312,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
             </div>
           </div>
 
-              
+
 
           <div className="border rounded-xl p-4 shadow-md">
             <h2 className="text-2xl font-semibold mb-4">Mis Amigos</h2>
