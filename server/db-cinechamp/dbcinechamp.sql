@@ -162,7 +162,7 @@ CREATE TABLE `usuario_logros` (
   CONSTRAINT `usuario_logros_ibfk_2` FOREIGN KEY (`logro_id`) REFERENCES `logros` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO logros (id, clave, titulo, descripcion, imagen_url) VALUES
+INSERT INTO logros (id, codigo, title, description, image_url) VALUES
 (1, 'logro_usuario', 'Fundadores', 'Primeros 10 registrados', 'http://localhost:3001/assets/fundadores.png'),
 (3, 'logro_usuario1', 'Soñadores', 'Primeros 100 registrados', 'http://localhost:3001/assets/soñador.png'),
 (4, 'logro_usuario2', 'Creadores', 'Primeros 250 registrados', 'http://localhost:3001/assets/credores.png'),
