@@ -4,7 +4,7 @@ import Login from "./pages/auth/Login/Login";
 import Register from "./pages/auth/Register/Register";
 
 import Perfil from "./pages/private/Perfil";
-import Resultados from "./pages/private/Resultados";
+import Buscador from "./pages/private/Buscador";
 import UsuarioResultado from "./pages/private/UsuarioResultado";
 import BuscarUsuario from "./pages/private/BuscarUsuario";
 import EditarPerfil from "./pages/private/EditarPerfil";
@@ -65,11 +65,13 @@ export default function App() {
 
 
         <Route
-          path="/id/:nick/resultados"
+          path="/id/:nick/buscador"
           element={
-            token ? <Resultados /> : <Navigate to="/login" />
+            token ? <Buscador /> : <Navigate to="/login" />
           }
         />
+
+        
 
         <Route
           path="/usuario/resultado"

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
-import Search from "./Search";
+
 
 type Movie = {
   id: number;
@@ -45,6 +45,17 @@ interface PerfilProps {
   onLogout: () => void;
 }
 
+type Calificacion = {
+  id: number;
+  titulo: string;
+  puntuacion: number;
+  comentario: string;
+  tipo: "movie" | "tv";
+  posterUrl: string;
+};
+
+
+
 export default function Perfil({ onLogout }: PerfilProps) {
   const { nick } = useParams();
   const location = useLocation(); // 👈 para detectar query param
@@ -59,13 +70,22 @@ export default function Perfil({ onLogout }: PerfilProps) {
   const [userId, setUserId] = useState<number | null>(null);
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [amigos, setAmigos] = useState<Amigo[]>([]);
-
+  const [calificaciones, setCalificaciones] = useState<Calificacion[]>([])
   const goHome = () => navigate("/");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) navigate("/login");
   }, [navigate]);
+
+  useEffect(() => {
+    if (!userId) return;
+    fetch(`http://localhost:3001/contenido/usuarios/${userId}/calificaciones`)
+      .then((res) => res.json())
+      .then(setCalificaciones)
+      .catch(console.error);
+  }, [userId]);
+
 
   useEffect(() => {
     if (!nick) return;
@@ -77,10 +97,13 @@ export default function Perfil({ onLogout }: PerfilProps) {
       })
       .then((res) => {
         const user = res.data;
+        const defaultAvatar = "https://i.pravatar.cc/150?img=3";
+        const avatarUrl = user.avatar && user.avatar.trim() !== "" ? user.avatar : defaultAvatar;
+
         setUserId(user.id);
         setProfile({
           name: user.nick,
-          photoUrl: user.avatar || "https://i.pravatar.cc/150?img=3",
+          photoUrl: avatarUrl,
         });
       })
       .catch((err) => {
@@ -163,7 +186,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
 
   const buscarPeliculas = () => {
     if (!query || !nick) return;
-    navigate(`/id/${nick}/resultados?q=${encodeURIComponent(query)}`);
+    navigate(`/id/${nick}/buscador?q=${encodeURIComponent(query)}`);
   };
 
   const buscarAmigo = () => {
@@ -253,7 +276,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
                 ))}
               </div>
               <div className="mt-2 text-right">
-                     <button
+                <button
                   onClick={() =>
                     navigate(`/usuario/${nick}/lista/favoritos/${type}`)
                   }
@@ -284,7 +307,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
                 ))}
               </div>
               <div className="mt-2 text-right">
-                    <button
+                <button
                   onClick={() =>
                     navigate(`/usuario/${nick}/lista/historial/${type}`)
                   }
@@ -329,8 +352,28 @@ export default function Perfil({ onLogout }: PerfilProps) {
               </div>
             )}
           </div>
+          <div className="border rounded-xl p-4 shadow-md">
+            <h2 className="text-2xl font-semibold mb-4">Últimas Calificaciones</h2>
+            {calificaciones.length === 0 ? (
+              <p className="text-gray-500">No has calificado ningún contenido aún.</p>
+            ) : (
+              <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                {calificaciones.map((item) => (
+                  <div key={item.id} className="flex gap-4 items-start border-b pb-2">
+                    <img src={item.posterUrl} className="w-12 h-16 object-cover rounded" />
+                    <div>
+                      <p className="font-medium">{item.titulo}</p>
+                      <p className="text-sm text-gray-600">⭐ {item.puntuacion}/10</p>
+                      {item.comentario && <p className="text-sm italic text-gray-700">“{item.comentario}”</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
 
       {/* Solicitudes */}
       <div className="border rounded-xl p-4 shadow-md mt-6">
