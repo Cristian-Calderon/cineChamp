@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation,Link } from "react-router-dom";
 
 type Usuario = {
   id: number;
@@ -53,11 +53,13 @@ export default function UsuarioResultado() {
 
       {usuario && (
         <div className="border rounded p-4 shadow flex items-center gap-4">
-          <img
-            src={usuario.avatar || "https://i.pravatar.cc/150"}
-            alt="Avatar"
-            className="w-20 h-20 object-cover rounded-full border"
-          />
+          <Link to={`/usuario/${usuario.nick}`}>
+            <img
+              src={usuario.avatar || "https://i.pravatar.cc/150"}
+              alt="Avatar"
+              className="w-20 h-20 object-cover rounded-full border cursor-pointer"
+            />
+          </Link>
           <div className="flex-1">
             <p className="text-lg font-semibold">{usuario.nick}</p>
             <p className="text-sm text-gray-500">{usuario.email}</p>

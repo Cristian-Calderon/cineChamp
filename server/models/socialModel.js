@@ -1,31 +1,31 @@
 // models/amigosModel.js
-const db = require('./db');
+const db = require("./db");
 
 const enviarSolicitud = async (usuarioId, amigoId) => {
-    console.log("📩 Recibida solicitud de amistad:");
-    console.log("➡️ Usuario que envía:", usuarioId);
-    console.log("➡️ Usuario que recibe:", amigoId);
-  
-    // Verificar si ya existe alguna relación
-    const [rows] = await db.query(
-      `SELECT * FROM amigos 
+  console.log("📩 Recibida solicitud de amistad:");
+  console.log("➡️ Usuario que envía:", usuarioId);
+  console.log("➡️ Usuario que recibe:", amigoId);
+
+  // Verificar si ya existe alguna relación
+  const [rows] = await db.query(
+    `SELECT * FROM amigos 
        WHERE (usuario_id = ? AND amigo_id = ?) 
           OR (usuario_id = ? AND amigo_id = ?)`,
-      [usuarioId, amigoId, amigoId, usuarioId]
-    );
-  
-    if (rows.length > 0) {
-      throw new Error("Ya existe una solicitud o amistad entre estos usuarios");
-    }
-  
-    // Si no hay ninguna relación, insertamos la solicitud
-    const [result] = await db.query(
-      'INSERT INTO amigos (usuario_id, amigo_id, estado) VALUES (?, ?, "pendiente")',
-      [usuarioId, amigoId]
-    );
-    return result.insertId;
-  };
-  
+    [usuarioId, amigoId, amigoId, usuarioId]
+  );
+
+  if (rows.length > 0) {
+    throw new Error("Ya existe una solicitud o amistad entre estos usuarios");
+  }
+
+  // Si no hay ninguna relación, insertamos la solicitud
+  const [result] = await db.query(
+    'INSERT INTO amigos (usuario_id, amigo_id, estado) VALUES (?, ?, "pendiente")',
+    [usuarioId, amigoId]
+  );
+  return result.insertId;
+};
+
 const obtenerSolicitudesPendientes = async (usuarioId) => {
   const [rows] = await db.query(
     `SELECT a.id, u.nick, u.avatar
@@ -65,15 +65,25 @@ const obtenerAmigos = async (usuarioId) => {
 };
 
 const obtenerEstadoRelacion = async (usuarioId, amigoId) => {
-    const [rows] = await db.query(
-      `SELECT estado FROM amigos 
+  const [rows] = await db.query(
+    `SELECT estado FROM amigos 
        WHERE (usuario_id = ? AND amigo_id = ?) 
           OR (usuario_id = ? AND amigo_id = ?)`,
-      [usuarioId, amigoId, amigoId, usuarioId]
-    );
-    return rows[0]?.estado || null;
-  };
+    [usuarioId, amigoId, amigoId, usuarioId]
+  );
+  return rows[0]?.estado || null;
+};
 
+// eliminar amistad: calderon
+const eliminarAmistad = async (usuarioId, amigoId) => {
+  const [result] = await db.query(
+    `DELETE FROM amigos 
+     WHERE (usuario_id = ? AND amigo_id = ?) 
+        OR (usuario_id = ? AND amigo_id = ?) AND estado = 'aceptado'`,
+    [usuarioId, amigoId, amigoId, usuarioId]
+  );
+  return result.affectedRows;
+};
 
 module.exports = {
   enviarSolicitud,
@@ -81,5 +91,6 @@ module.exports = {
   aceptarSolicitud,
   rechazarSolicitud,
   obtenerAmigos,
-  obtenerEstadoRelacion
+  obtenerEstadoRelacion,
+  eliminarAmistad,
 };

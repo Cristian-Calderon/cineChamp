@@ -10,6 +10,7 @@ router.post('/solicitud/:id/rechazar', amigosController.rechazarSolicitud);
 router.get('/lista/:id', amigosController.obtenerAmigos);
 router.get('/estado', amigosController.estadoRelacion);
 
+router.post('/eliminar', amigosController.eliminarAmistad);
 
 
 module.exports = router;
