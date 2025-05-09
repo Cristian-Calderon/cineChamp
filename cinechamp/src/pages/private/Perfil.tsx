@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
-
+import Carrusel from "../../components/CarucelContenido/Carrusel";
 
 type Movie = {
   id: number;
@@ -213,10 +213,9 @@ export default function Perfil({ onLogout }: PerfilProps) {
   };
 
   return (
-
     <div className="p-6 w-full">
       <h1 className="text-3xl font-bold mb-6">CineChamp</h1>
-
+  
       {/* Perfil y buscadores */}
       <div className="w-full bg-white border rounded-xl p-4 shadow-md mb-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
         <div className="flex items-center gap-4">
@@ -232,7 +231,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
             <button onClick={handleLogout} className="mt-2 ml-2 bg-red-500 text-white px-2 py-1 rounded text-sm">Cerrar sesión</button>
           </div>
         </div>
-
+  
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto justify-end">
           <div className="flex gap-2 w-full sm:w-64">
             <input
@@ -254,74 +253,33 @@ export default function Perfil({ onLogout }: PerfilProps) {
           </div>
         </div>
       </div>
-
+  
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Izquierda: Contenido */}
-        <div className="w-full lg:w-1/2 flex flex-col gap-4">
-          {["movie", "tv"].map((type) => (
-            <div key={`favoritos-${type}`} className="border rounded-xl p-4 shadow-md">
-              <h2 className="text-xl font-semibold mb-4">
-                {type === "movie" ? "🎬 Favoritos - Películas" : "📺 Favoritos - Series"}
-              </h2>
-              <div className="grid grid-cols-3 gap-4">
-                {favorites.filter(f => f.media_type === type).slice(0, 9).map((movie) => (
-                  <div key={`${movie.id}-${type}`} className="flex flex-col items-center">
-                    <img
-                      src={movie.posterUrl}
-                      alt={movie.title}
-                      className="w-120 h-[123px] object-cover rounded-md shadow-sm"
-                    />
-                    <p className="text-xs text-center mt-2 line-clamp-2">{movie.title}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-2 text-right">
-                <button
-                  onClick={() =>
-                    navigate(`/usuario/${nick}/lista/favoritos/${type}`)
-                  }
-                  className="text-blue-600 text-sm hover:underline"
-                >
-                  Ver más →
-                </button>
-
-              </div>
-            </div>
-          ))}
-
-          {["movie", "tv"].map((type) => (
-            <div key={`historial-${type}`} className="border rounded-xl p-2 shadow-md">
-              <h2 className="text-xl font-semibold mb-4">
-                {type === "movie" ? "🎬 Historial - Películas" : "📺 Historial - Series"}
-              </h2>
-              <div className="grid grid-cols-3 gap-4">
-                {historial.filter(h => h.media_type === type).slice(0, 9).map((item) => (
-                  <div key={`${item.id}-${type}`} className="flex flex-col items-center">
-                    <img
-                      src={item.posterUrl}
-                      alt={item.title}
-                      className="w-120 h-[123px] object-cover rounded-md shadow-sm"
-                    />
-                    <p className="text-xs text-center mt-2 line-clamp-2">{item.title}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-2 text-right">
-                <button
-                  onClick={() =>
-                    navigate(`/usuario/${nick}/lista/historial/${type}`)
-                  }
-                  className="text-blue-600 text-sm hover:underline"
-                >
-                  Ver más →
-                </button>
-              </div>
-            </div>
-          ))}
+        {/* Izquierda: Historial y Favoritos */}
+        <div className="w-full lg:w-1/2 flex flex-col gap-6">
+          <Carrusel
+            titulo="🎬 Historial - Películas"
+            items={historial.filter(h => h.media_type === "movie").slice(0, 10)}
+            onVerMas={() => navigate(`/usuario/${nick}/lista/historial/movie`)}
+          />
+          <Carrusel
+            titulo="📺 Historial - Series"
+            items={historial.filter(h => h.media_type === "tv").slice(0, 10)}
+            onVerMas={() => navigate(`/usuario/${nick}/lista/historial/tv`)}
+          />
+          <Carrusel
+            titulo="🎬 Tus Películas Favoritas"
+            items={favorites.filter(f => f.media_type === "movie").slice(0, 10)}
+            onVerMas={() => navigate(`/usuario/${nick}/lista/favoritos/movie`)}
+          />
+          <Carrusel
+            titulo="📺 Tus Series Favoritas"
+            items={favorites.filter(f => f.media_type === "tv").slice(0, 10)}
+            onVerMas={() => navigate(`/usuario/${nick}/lista/favoritos/tv`)}
+          />
         </div>
-
-
-        {/* Derecha: Logros y Amigos */}
+  
+        {/* Derecha: Logros, Amigos, Calificaciones, Solicitudes */}
         <div className="w-full lg:w-1/2 flex flex-col gap-6">
           <div className="border rounded-xl p-4 shadow-md">
             <h2 className="text-2xl font-semibold mb-4">Logros</h2>
@@ -334,9 +292,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
               ))}
             </div>
           </div>
-
-
-
+  
           <div className="border rounded-xl p-4 shadow-md">
             <h2 className="text-2xl font-semibold mb-4">Mis Amigos</h2>
             {amigos.length === 0 ? (
@@ -352,6 +308,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
               </div>
             )}
           </div>
+  
           <div className="border rounded-xl p-4 shadow-md">
             <h2 className="text-2xl font-semibold mb-4">Últimas Calificaciones</h2>
             {calificaciones.length === 0 ? (
@@ -371,26 +328,24 @@ export default function Perfil({ onLogout }: PerfilProps) {
               </div>
             )}
           </div>
-        </div>
-      </div>
-
-
-      {/* Solicitudes */}
-      <div className="border rounded-xl p-4 shadow-md mt-6">
-        <h2 className="text-2xl font-semibold mb-4">Solicitudes de amistad</h2>
-        {solicitudes.length === 0 ? (
-          <p className="text-gray-500">No tienes solicitudes pendientes.</p>
-        ) : (
-          <div className="space-y-3">
-            {solicitudes.map((s) => (
-              <div key={`amigo-${s.id}`} className="flex items-center gap-4">
-                <img src={s.avatar || "https://i.pravatar.cc/150"} className="w-10 h-10 rounded-full object-cover border" />
-                <span className="flex-1 font-medium">{s.nick}</span>
-                <button onClick={() => aceptarSolicitud(s.id)} className="bg-green-500 text-white px-3 py-1 rounded text-sm">Aceptar</button>
+  
+          <div className="border rounded-xl p-4 shadow-md">
+            <h2 className="text-2xl font-semibold mb-4">Solicitudes de amistad</h2>
+            {solicitudes.length === 0 ? (
+              <p className="text-gray-500">No tienes solicitudes pendientes.</p>
+            ) : (
+              <div className="space-y-3">
+                {solicitudes.map((s) => (
+                  <div key={`amigo-${s.id}`} className="flex items-center gap-4">
+                    <img src={s.avatar || "https://i.pravatar.cc/150"} className="w-10 h-10 rounded-full object-cover border" />
+                    <span className="flex-1 font-medium">{s.nick}</span>
+                    <button onClick={() => aceptarSolicitud(s.id)} className="bg-green-500 text-white px-3 py-1 rounded text-sm">Aceptar</button>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
