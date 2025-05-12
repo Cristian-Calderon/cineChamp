@@ -58,14 +58,30 @@ async function obtenerAmigos(req, res) {
 }
 
 async function estadoRelacion(req, res) {
-    const { usuarioId, amigoId } = req.query;
-    try {
-      const estado = await Amigos.obtenerEstadoRelacion(usuarioId, amigoId);
-      res.json({ estado });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
+  const { usuarioId, amigoId } = req.query;
+  try {
+    const estado = await Amigos.obtenerEstadoRelacion(usuarioId, amigoId);
+    res.json({ estado });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
+}
+
+// eliminarAmistad : calderon
+async function eliminarAmistad(req, res) {
+  const { usuarioId, amigoId } = req.body;
+  try {
+    const resultado = await Amigos.eliminarAmistad(usuarioId, amigoId);
+    if (resultado === 0) {
+      return res
+        .status(404)
+        .json({ error: "No se encontró la relación de amistad" });
+    }
+    res.json({ message: "Amistad eliminada correctamente" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 
 module.exports = {
   enviarSolicitud,
@@ -73,5 +89,6 @@ module.exports = {
   aceptarSolicitud,
   rechazarSolicitud,
   obtenerAmigos,
-  estadoRelacion
+  estadoRelacion,
+  eliminarAmistad,
 };

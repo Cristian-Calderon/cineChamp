@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 type Amigo = {
   id: number;
@@ -14,6 +16,9 @@ export default function AmigosComponente({ amigos }: AmigosPreviewProps) {
   const [verTodos, setVerTodos] = useState(false);
   const amigosCortos = amigos.slice(0, 6);
 
+    const navigate = useNavigate();
+
+
   return (
     <div className="border rounded-xl p-4 shadow-md relative">
       <h2 className="text-2xl font-semibold mb-4">Amigos</h2>
@@ -27,7 +32,8 @@ export default function AmigosComponente({ amigos }: AmigosPreviewProps) {
               <img
                 src={amigo.avatar || "https://i.pravatar.cc/150"}
                 alt={amigo.nick}
-                className="w-14 h-14 rounded-full border object-cover mb-1"
+                onClick={() => navigate(`/usuario/${amigo.nick}`)}
+                className="w-14 h-14 rounded-full border object-cover mb-1 cursor-pointer"
               />
               <p className="text-xs truncate">{amigo.nick}</p>
             </div>

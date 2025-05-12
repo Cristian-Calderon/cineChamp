@@ -10,7 +10,7 @@ import BuscarUsuario from "./pages/private/BuscarUsuario";
 import EditarPerfil from "./pages/private/EditarPerfil";
 import ListaContenido from "./pages/private/ListaContenido";
 
-
+import PerfilPublico from "./pages/private/PerfilPublico";
 
 
 // Verificar ruta /
@@ -74,7 +74,7 @@ export default function App() {
           }
         />
 
-        
+
 
         <Route
           path="/usuario/resultado"
@@ -83,14 +83,17 @@ export default function App() {
 
         <Route path="/buscar-usuario" element={<BuscarUsuario />} />
         <Route path="/editar-perfil" element={<EditarPerfil />} />
-        {/* 
-        <Route path="/uFavoritos/:userId" element={<ListaContenido />} />
-        <Route path="/uHistorial/:userId" element={<ListaContenido />} /> */}
+
 
 
         <Route path="/usuario/:nick/lista/:section/:media_type"
-          element={token ? <ListaContenido /> : <Navigate to="/login" replace />} 
-          />
+          element={token ? <ListaContenido /> : <Navigate to="/login" replace />}
+        />
+
+        <Route
+          path="/usuario/:nick"
+          element={token ? <PerfilPublico /> : <Navigate to="/login" />}
+        />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

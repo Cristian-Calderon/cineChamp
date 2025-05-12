@@ -23,7 +23,7 @@ export default function Carrusel({ titulo, items, onVerMas }: CarruselProps) {
           {items.slice(0, 10).map((item) => (
             <div
               key={item.id}
-              className="flex-shrink-0 snap-start w-96 h-96 transition-transform transform hover:scale-105"
+              className="flex-shrink-0 snap-start w-64  transition-transform transform hover:scale-105"
             >
               <div className="relative group rounded-2xl overflow-hidden shadow-md hover:shadow-xl">
                 <img

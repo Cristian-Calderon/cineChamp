@@ -65,15 +65,25 @@ const obtenerAmigos = async (usuarioId) => {
 };
 
 const obtenerEstadoRelacion = async (usuarioId, amigoId) => {
-    const [rows] = await db.query(
-      `SELECT estado FROM amigos 
+  const [rows] = await db.query(
+    `SELECT estado FROM amigos 
        WHERE (usuario_id = ? AND amigo_id = ?) 
           OR (usuario_id = ? AND amigo_id = ?)`,
-      [usuarioId, amigoId, amigoId, usuarioId]
-    );
-    return rows[0]?.estado || null;
-  };
+    [usuarioId, amigoId, amigoId, usuarioId]
+  );
+  return rows[0]?.estado || null;
+};
 
+// eliminar amistad: calderon
+const eliminarAmistad = async (usuarioId, amigoId) => {
+  const [result] = await db.query(
+    `DELETE FROM amigos 
+     WHERE (usuario_id = ? AND amigo_id = ?) 
+        OR (usuario_id = ? AND amigo_id = ?) AND estado = 'aceptado'`,
+    [usuarioId, amigoId, amigoId, usuarioId]
+  );
+  return result.affectedRows;
+};
 
 module.exports = {
   enviarSolicitud,
@@ -81,5 +91,6 @@ module.exports = {
   aceptarSolicitud,
   rechazarSolicitud,
   obtenerAmigos,
-  obtenerEstadoRelacion
+  obtenerEstadoRelacion,
+  eliminarAmistad,
 };

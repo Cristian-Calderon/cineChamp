@@ -6,7 +6,9 @@ import LogrosPreview from "../../components/Logros/LogrosComponentes";
 import AmigosComponentes from "../../components/Social/AmigosComponente";
 import UltimasCalificaciones from "../../components/Calificaciones/UltimasCalificaciones";
 import SolicitudesAmistad from "../../components/Social/SolicitudesAmistad";
-
+import PerfilHeader from "../../components/PerfilHeader/PerfilHeader";
+import BuscadorUnificado from "../../components/BuscadorUnificado/BuscadorUnificado";
+import logo from "../../assets/imagen-header-logo/LogoCineChamp.png";
 
 type Movie = {
   id: number;
@@ -51,7 +53,7 @@ interface PerfilProps {
 }
 
 type Calificacion = {
-  id: String;
+  id: string;
   titulo: string;
   puntuacion: number;
   comentario: string;
@@ -63,7 +65,7 @@ type Calificacion = {
 
 export default function Perfil({ onLogout }: PerfilProps) {
   const { nick } = useParams();
-  const location = useLocation(); // 👈 para detectar query param
+  const location = useLocation();
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState<Profile>({ name: "", photoUrl: "" });
@@ -76,7 +78,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [amigos, setAmigos] = useState<Amigo[]>([]);
   const [calificaciones, setCalificaciones] = useState<Calificacion[]>([])
- 
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -219,49 +221,28 @@ export default function Perfil({ onLogout }: PerfilProps) {
 
   return (
     <div className="p-6 w-full">
-      <h1 className="text-3xl font-bold mb-6">CineChamp</h1>
+       
 
       {/* Perfil y buscadores */}
-      <div className="w-full bg-white border rounded-xl p-4 shadow-md mb-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-20 h-20 border-4 border-gray-300 rounded-full overflow-hidden">
-            <img src={profile.photoUrl} alt="Foto de perfil" className="w-full h-full object-cover" />
-          </div>
-          <div>
-            <p className="text-lg font-semibold">{profile.name}</p>
-            <button
-              onClick={() => navigate(`/editar-perfil`)}
-              className="mt-1 bg-indigo-600 text-white px-3 py-1 rounded text-sm"
-            >Editar Perfil</button>
-            <button onClick={handleLogout} className="mt-2 ml-2 bg-red-500 text-white px-2 py-1 rounded text-sm">Cerrar sesión</button>
-          </div>
-        </div>
+      <div className="w-full bg-stone-500 border rounded-xl p-4 shadow-md mb-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
+      <img src={logo} alt="CineChamp Logo" className="h-30  w-40 object-contain" />
+        <PerfilHeader
+          photoUrl={profile.photoUrl}
+          name={profile.name}
+          onLogout={handleLogout}
+          onEditProfile={() => navigate("/editar-perfil")}
+          
+        />
 
-        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto justify-end">
-          <div className="flex gap-2 w-full sm:w-64">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="border p-2 rounded w-full"
-              placeholder="Buscar película o serie"
-            />
-            <button onClick={buscarPeliculas} className="bg-blue-600 text-white px-3 rounded">Buscar</button>
-          </div>
-          <div className="flex gap-2 w-full sm:w-64">
-            <input
-              value={nickAmigo}
-              onChange={(e) => setNickAmigo(e.target.value)}
-              className="border p-2 rounded w-full"
-              placeholder="Buscar amigo"
-            />
-            <button onClick={buscarAmigo} className="bg-green-600 text-white px-3 rounded">Buscar</button>
-          </div>
-        </div>
-      </div>
+        <BuscadorUnificado
+          onBuscarPeliculas={(query) => navigate(`/id/${nick}/buscador?q=${encodeURIComponent(query)}`)}
+          onBuscarAmigo={(nickAmigo) => navigate(`/usuario/resultado?nick=${encodeURIComponent(nickAmigo)}`)}
+        />
+      </div> {/* ✅ Cierre correcto del contenedor de cabecera + buscador */}
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Izquierda: Historial y Favoritos */}
-        <div className="w-full lg:w-1/2 flex flex-col gap-6">
+        <div className="w-full lg:w-4/6">
           <Carrusel
             titulo="🎬 Historial - Películas"
             items={historial.filter(h => h.media_type === "movie").slice(0, 10)}
@@ -285,10 +266,9 @@ export default function Perfil({ onLogout }: PerfilProps) {
         </div>
 
         {/* Derecha: Logros, Amigos, Calificaciones, Solicitudes */}
-        <div className="w-full lg:w-1/2 flex flex-col gap-6">
+        <div className="w-full lg:w-1/2 space-y-4">
           <LogrosPreview achievements={achievements} />
           <AmigosComponentes amigos={amigos} />
-
           <UltimasCalificaciones
             calificaciones={calificaciones.map(cal => ({
               ...cal,

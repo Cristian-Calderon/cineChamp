@@ -94,6 +94,27 @@ CREATE TABLE series (
     CONSTRAINT fk_serie_biblioteca FOREIGN KEY (id_biblioteca) REFERENCES contenido(id_biblioteca) ON DELETE CASCADE
 );
 
+-- Nueva tabla de calificacion May 12:
+-- Tabla de calificación de contenido por los usuarios
+CREATE TABLE calificacion (
+    id_calificacion INT NOT NULL AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    puntuacion INT DEFAULT NULL CHECK (puntuacion BETWEEN 1 AND 10),
+    comentario TEXT,
+    fecha TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    id_api INT NOT NULL,
+    tipo ENUM('pelicula', 'serie') NOT NULL,
+    
+    PRIMARY KEY (id_calificacion),
+
+    -- Un usuario solo puede calificar una vez el mismo contenido de la API
+    UNIQUE KEY unique_usuario_api (id_usuario, id_api),
+
+    -- Claves foráneas sugeridas (puedes modificar los nombres de tabla y columna si son diferentes)
+    CONSTRAINT fk_calificacion_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id) ON DELETE CASCADE,
+    CONSTRAINT fk_calificacion_api FOREIGN KEY (id_api) REFERENCES contenido(id_biblioteca) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 -- Tabla de calificación de contenido por los usuarios
 CREATE TABLE calificacion (
     id_calificacion INT AUTO_INCREMENT PRIMARY KEY,
