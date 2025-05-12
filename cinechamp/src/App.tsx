@@ -10,6 +10,9 @@ import BuscarUsuario from "./pages/private/BuscarUsuario";
 import EditarPerfil from "./pages/private/EditarPerfil";
 import ListaContenido from "./pages/private/ListaContenido";
 
+
+
+
 // Verificar ruta /
 function HomeRedirect() {
   const token = localStorage.getItem("token");

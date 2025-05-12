@@ -23,13 +23,13 @@ export default function Carrusel({ titulo, items, onVerMas }: CarruselProps) {
           {items.slice(0, 10).map((item) => (
             <div
               key={item.id}
-              className="flex-shrink-0 snap-start w-48 transition-transform transform hover:scale-105"
+              className="flex-shrink-0 snap-start w-96 h-96 transition-transform transform hover:scale-105"
             >
               <div className="relative group rounded-2xl overflow-hidden shadow-md hover:shadow-xl">
                 <img
                   src={item.posterUrl}
                   alt={item.title}
-                  className="w-full h-72 object-cover rounded-2xl"
+                  className="w-full h-96 object-cover rounded-2xl"
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-3">
                   <p className="text-white text-sm font-semibold truncate">{item.title}</p>

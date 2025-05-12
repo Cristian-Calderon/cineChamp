@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import Carrusel from "../../components/CarucelContenido/Carrusel";
+import LogrosPreview from "../../components/Logros/LogrosComponentes";
+import AmigosComponentes from "../../components/Social/AmigosComponente";
+import UltimasCalificaciones from "../../components/Calificaciones/UltimasCalificaciones";
+import SolicitudesAmistad from "../../components/Social/SolicitudesAmistad";
+
 
 type Movie = {
   id: number;
@@ -46,7 +51,7 @@ interface PerfilProps {
 }
 
 type Calificacion = {
-  id: number;
+  id: String;
   titulo: string;
   puntuacion: number;
   comentario: string;
@@ -71,7 +76,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [amigos, setAmigos] = useState<Amigo[]>([]);
   const [calificaciones, setCalificaciones] = useState<Calificacion[]>([])
-  const goHome = () => navigate("/");
+ 
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -215,7 +220,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
   return (
     <div className="p-6 w-full">
       <h1 className="text-3xl font-bold mb-6">CineChamp</h1>
-  
+
       {/* Perfil y buscadores */}
       <div className="w-full bg-white border rounded-xl p-4 shadow-md mb-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
         <div className="flex items-center gap-4">
@@ -231,7 +236,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
             <button onClick={handleLogout} className="mt-2 ml-2 bg-red-500 text-white px-2 py-1 rounded text-sm">Cerrar sesión</button>
           </div>
         </div>
-  
+
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto justify-end">
           <div className="flex gap-2 w-full sm:w-64">
             <input
@@ -253,7 +258,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
           </div>
         </div>
       </div>
-  
+
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Izquierda: Historial y Favoritos */}
         <div className="w-full lg:w-1/2 flex flex-col gap-6">
@@ -278,73 +283,22 @@ export default function Perfil({ onLogout }: PerfilProps) {
             onVerMas={() => navigate(`/usuario/${nick}/lista/favoritos/tv`)}
           />
         </div>
-  
+
         {/* Derecha: Logros, Amigos, Calificaciones, Solicitudes */}
         <div className="w-full lg:w-1/2 flex flex-col gap-6">
-          <div className="border rounded-xl p-4 shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">Logros</h2>
-            <div className="flex flex-wrap gap-4">
-              {achievements.map((logro) => (
-                <div key={logro.id} className="w-20 flex flex-col items-center text-center" title={`${logro.title} - ${logro.description}`}>
-                  <img src={logro.image_url} alt={logro.title} className="w-[40px] h-[40px] object-contain border rounded shadow-md" />
-                  <span className="text-xs mt-1">{logro.title}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-  
-          <div className="border rounded-xl p-4 shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">Mis Amigos</h2>
-            {amigos.length === 0 ? (
-              <p className="text-gray-500">No tienes amigos aún.</p>
-            ) : (
-              <div className="flex flex-wrap gap-4">
-                {amigos.map((amigo) => (
-                  <div key={amigo.id} className="text-center">
-                    <img src={amigo.avatar || "https://i.pravatar.cc/150"} className="w-14 h-14 rounded-full border mb-1 object-cover" alt={amigo.nick} />
-                    <p className="text-sm">{amigo.nick}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-  
-          <div className="border rounded-xl p-4 shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">Últimas Calificaciones</h2>
-            {calificaciones.length === 0 ? (
-              <p className="text-gray-500">No has calificado ningún contenido aún.</p>
-            ) : (
-              <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                {calificaciones.map((item) => (
-                  <div key={item.id} className="flex gap-4 items-start border-b pb-2">
-                    <img src={item.posterUrl} className="w-12 h-16 object-cover rounded" />
-                    <div>
-                      <p className="font-medium">{item.titulo}</p>
-                      <p className="text-sm text-gray-600">⭐ {item.puntuacion}/10</p>
-                      {item.comentario && <p className="text-sm italic text-gray-700">“{item.comentario}”</p>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-  
-          <div className="border rounded-xl p-4 shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">Solicitudes de amistad</h2>
-            {solicitudes.length === 0 ? (
-              <p className="text-gray-500">No tienes solicitudes pendientes.</p>
-            ) : (
-              <div className="space-y-3">
-                {solicitudes.map((s) => (
-                  <div key={`amigo-${s.id}`} className="flex items-center gap-4">
-                    <img src={s.avatar || "https://i.pravatar.cc/150"} className="w-10 h-10 rounded-full object-cover border" />
-                    <span className="flex-1 font-medium">{s.nick}</span>
-                    <button onClick={() => aceptarSolicitud(s.id)} className="bg-green-500 text-white px-3 py-1 rounded text-sm">Aceptar</button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <LogrosPreview achievements={achievements} />
+          <AmigosComponentes amigos={amigos} />
+
+          <UltimasCalificaciones
+            calificaciones={calificaciones.map(cal => ({
+              ...cal,
+              id: cal.id.toString(),
+            }))}
+          />
+          <SolicitudesAmistad
+            solicitudes={solicitudes.map((s) => ({ ...s, id: s.id.toString() }))}
+            aceptarSolicitud={(id: string) => aceptarSolicitud(Number(id))}
+          />
         </div>
       </div>
     </div>
