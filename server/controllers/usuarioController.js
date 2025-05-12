@@ -35,7 +35,12 @@ async function login(req, res) {
       { expiresIn: '1d' }
     );
     // Enviamos el toker y enviamos el id
-    res.json({ token, nick: user.nick, id: user.id });
+    res.json({
+      token,
+      nick: user.nick,
+      id: user.id,
+      avatar: user.avatar || null,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

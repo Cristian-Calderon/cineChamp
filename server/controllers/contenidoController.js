@@ -31,39 +31,32 @@ const verificarConexionAPI = async (req, res) => {
   }
 };
 
-
 const buscarContenidoController = async (req, res) => {
   const query = req.query.q;
 
   try {
     const peliculas = await buscarContenido(query);
     const series = await buscarSeries(query);
-    
     const resultados = [...peliculas, ...series];
     res.json(resultados);
   } catch (error) {
     console.error("Error al buscar contenido:", error);
     res.status(500).json({ error: "Error al buscar contenido" });
   }
-}
-
-
+};
 
 const agregarContenidoController = async (req, res) => {
   const { id_usuario, id_api } = req.body;
-  console.log("📩 Datos recibidos en favoritoContenidoController:", { id_usuario, id_api });
-
+  console.log("📩 Datos recibidos en agregarContenidoController:", { id_usuario, id_api });
 
   if (!id_usuario || !id_api) {
     return res.status(400).json({ error: 'Faltan datos' });
   }
 
   try {
-    // 1. Intentamos primero obtener como película
     let data = await obtenerDetallesPorId(id_api, 'movie');
     let tipo = 'pelicula';
 
-    // 2. Si no existe como película, intentamos como serie
     if (!data || data.success === false) {
       data = await obtenerDetallesPorId(id_api, 'tv');
       tipo = 'serie';
@@ -73,19 +66,32 @@ const agregarContenidoController = async (req, res) => {
       return res.status(404).json({ error: 'Contenido no encontrado en TMDB' });
     }
 
-    // 3. Insertar en contenido_guardado
-    await db.query(
+    const [result] = await db.query(
       'INSERT IGNORE INTO contenido_guardado (id_usuario, id_api, tipo) VALUES (?, ?, ?)',
       [id_usuario, id_api, tipo]
     );
 
-    // 4. Verificar logros
-    await verificarLogros(id_usuario);
-    
+    let id_contenidoGuardado = result.insertId;
 
-    res.status(201).json({ message: `${tipo === 'pelicula' ? 'Película' : 'Serie'} agregada correctamente.` });
+    if (!id_contenidoGuardado) {
+      const [rows] = await db.query(
+        'SELECT id FROM contenido_guardado WHERE id_usuario = ? AND id_api = ?',
+        [id_usuario, id_api]
+      );
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'No se encontró contenido_guardado existente' });
+      }
+      id_contenidoGuardado = rows[0].id;
+    }
+
+    await verificarLogros(id_usuario);
+
+    res.status(201).json({
+      message: `${tipo === 'pelicula' ? 'Película' : 'Serie'} agregada correctamente.`,
+      id_contenidoGuardado,
+    });
   } catch (error) {
-    console.error('Error al agregar contenido:', error);
+    console.error('❌ Error al agregar contenido:', error);
     res.status(500).json({ error: 'Error interno al guardar contenido' });
   }
 };
@@ -94,17 +100,14 @@ const favoritoContenidoController = async (req, res) => {
   const { id_usuario, id_tmdb } = req.body;
   console.log("📩 Datos recibidos en favoritoContenidoController:", { id_usuario, id_tmdb });
 
-
   if (!id_usuario || !id_tmdb) {
     return res.status(400).json({ error: 'Faltan datos' });
   }
 
   try {
-    // 1. Intentamos obtener como película
     let data = await obtenerDetallesPorId(id_tmdb, 'movie');
     let tipo = 'pelicula';
 
-    // 2. Si falla, probamos como serie
     if (!data || data.success === false) {
       data = await obtenerDetallesPorId(id_tmdb, 'tv');
       tipo = 'serie';
@@ -116,13 +119,11 @@ const favoritoContenidoController = async (req, res) => {
 
     const titulo = data.title || data.name;
 
-    // 3. Guardamos en tabla de favoritos
     await db.query(
       'INSERT IGNORE INTO favoritos (id_usuario, id_tmdb, titulo) VALUES (?, ?, ?)',
       [id_usuario, id_tmdb, titulo]
     );
 
-   
     await verificarLogros(id_usuario);
 
     res.status(201).json({ message: `${tipo === 'pelicula' ? 'Película' : 'Serie'} marcada como favorita: ${titulo}` });
@@ -167,21 +168,21 @@ const obtenerFavoritosPorUsuario = async (req, res) => {
   }
 };
 
-
 const obtenerHistorialPorUsuario = async (req, res) => {
   const { id_usuario } = req.params;
 
   try {
     const [historial] = await db.query(
-      'SELECT id_api, tipo FROM contenido_guardado WHERE id_usuario = ?',
+      'SELECT id, id_api, tipo FROM contenido_guardado WHERE id_usuario = ?',
       [id_usuario]
     );
 
     const resultados = await Promise.all(
-      historial.map(async ({ id_api, tipo }) => {
+      historial.map(async ({ id, id_api, tipo }) => {
         const data = await obtenerDetallesPorId(id_api, tipo === 'pelicula' ? 'movie' : 'tv');
         return {
           id: id_api,
+          id_contenidoGuardado: id,
           title: data?.title || data?.name,
           posterUrl: `https://image.tmdb.org/t/p/w500${data?.poster_path}`,
           media_type: tipo === 'pelicula' ? 'movie' : 'tv'
@@ -196,6 +197,73 @@ const obtenerHistorialPorUsuario = async (req, res) => {
   }
 };
 
+const calificarContenido = async (req, res) => {
+  const { id_usuario, id_api, tipo, puntuacion, comentario } = req.body;
+  console.log("📩 Body recibido en /calificar:", req.body);
+
+  if (!id_usuario || !id_api || !tipo || !puntuacion) {
+    return res.status(400).json({ error: 'Faltan datos requeridos' });
+  }
+
+  if (puntuacion < 1 || puntuacion > 10) {
+    return res.status(400).json({ error: 'La puntuación debe estar entre 1 y 10' });
+  }
+
+  try {
+    await db.query(
+      'INSERT INTO calificacion (id_usuario, id_api, tipo, puntuacion, comentario) VALUES (?, ?, ?, ?, ?)',
+      [id_usuario, id_api, tipo, puntuacion, comentario || null]
+    );
+
+    res.status(201).json({ message: '✅ Calificación guardada correctamente' });
+  } catch (error) {
+    console.error('❌ Error al guardar calificación:', error);
+    res.status(500).json({ error: 'Error interno al guardar la calificación' });
+  }
+};
+
+
+
+
+
+const obtenerCalificacionesDelUsuario = async (req, res) => {
+  const { id_usuario } = req.params;
+
+  try {
+    const [calificaciones] = await db.query(
+      'SELECT id_api, tipo, puntuacion, comentario FROM calificacion WHERE id_usuario = ?',
+      [id_usuario]
+    );
+
+    const resultados = await Promise.all(
+      calificaciones.map(async ({ id_api, tipo, puntuacion, comentario }) => {
+        const data = await obtenerDetallesPorId(id_api, tipo === 'pelicula' ? 'movie' : 'tv');
+
+        return {
+          id: id_api,
+          title: data?.title || data?.name,
+          posterUrl: data?.poster_path
+            ? `https://image.tmdb.org/t/p/w500${data.poster_path}`
+            : null,
+          media_type: tipo === 'pelicula' ? 'movie' : 'tv',
+          puntuacion,
+          comentario
+        };
+      })
+    );
+
+    res.json(resultados);
+  } catch (error) {
+    console.error('❌ Error al obtener calificaciones del usuario:', error);
+    res.status(500).json({ error: 'Error interno al obtener calificaciones' });
+  }
+};
+
+
+
+
+
+
 module.exports = {
   buscarAPI,
   verificarConexionAPI,
@@ -203,5 +271,7 @@ module.exports = {
   favoritoContenidoController,
   agregarContenidoController,
   obtenerHistorialPorUsuario,
-  obtenerFavoritosPorUsuario
+  obtenerFavoritosPorUsuario,
+  calificarContenido,
+  obtenerCalificacionesDelUsuario
 };

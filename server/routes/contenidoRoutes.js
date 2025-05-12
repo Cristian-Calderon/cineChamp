@@ -9,8 +9,12 @@ const {
   buscarAPI,
   obtenerHistorialPorUsuario,
   obtenerFavoritosPorUsuario,
-
+  calificarContenido,
+  obtenerCalificacionesDelUsuario
 } = require('../controllers/contenidoController');
+
+
+
 
 // Verificación de conexión
 router.get('/check-api', verificarConexionAPI);
@@ -26,6 +30,11 @@ router.post('/agregar', agregarContenidoController);
 router.post('/favorito', favoritoContenidoController);
 router.get('/favoritos/:id_usuario', obtenerFavoritosPorUsuario);
 router.get('/historial/:id_usuario', obtenerHistorialPorUsuario);
+
+
+//para la calificacion y comentario
+router.post('/calificar', calificarContenido);
+router.get('/usuarios/:id_usuario/calificaciones', obtenerCalificacionesDelUsuario);
 
 
 module.exports = router;

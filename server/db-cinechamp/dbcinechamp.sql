@@ -179,3 +179,12 @@ INSERT INTO logros (id, codigo, title, description, image_url) VALUES
 (19, 'logro_usuario13', 'Indomable', '600 películas vistas', 'http://localhost:3001/assets/indomable.png'),
 (20, 'logro_usuario14', 'Freak', '700 películas vistas', 'http://localhost:3001/assets/Freak.png'),
 (21, 'logro_favorito', 'Primer Favorito', 'Has agregado tu primer favorito', 'http://localhost:3001/assets/primero.png');
+
+
+--modificacion tabla calificacion :
+ALTER TABLE calificacion 
+CHANGE id_biblioteca id_contenidoGuardado INT NOT NULL;
+
+--Qued apendiente borrar contrains
+ALTER TABLE calificacion DROP INDEX unique_calificacion;
+ALTER TABLE calificacion ADD UNIQUE unique_usuario_api (id_usuario, id_api);
