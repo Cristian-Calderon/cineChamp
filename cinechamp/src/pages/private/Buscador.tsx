@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
+import ModalPuntuacion from "../../components/Modal/ModalPuntuacion"; // ajusta según tu estructura
 
-// Tipo para los resultados de búsqueda
 type Resultado = {
   id: number;
   title?: string;
@@ -13,11 +13,18 @@ type Resultado = {
 export default function Buscador() {
   const { nick } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [query, setQuery] = useState("");
   const [resultados, setResultados] = useState<Resultado[]>([]);
   const [loading, setLoading] = useState(false);
   const userId = parseInt(localStorage.getItem("userId") || "0");
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalItem, setModalItem] = useState<Resultado | null>(null);
+  const [tipoGuardadoModal, setTipoGuardadoModal] = useState<"favorito" | "historial" | null>(null);
+  const [puntuacionInput, setPuntuacionInput] = useState("");
+  const [comentarioInput, setComentarioInput] = useState("");
 
   useEffect(() => {
     const q = new URLSearchParams(location.search).get("q") || "";
@@ -40,71 +47,60 @@ export default function Buscador() {
     }
   };
 
-  const manejarAgregar = async (item: Resultado, tipoGuardado: "favorito" | "historial") => {
-    console.log("Guardando como:", tipoGuardado, item);
+  const manejarAgregar = (item: Resultado, tipo: "favorito" | "historial") => {
+    setModalItem(item);
+    setTipoGuardadoModal(tipo);
+    setModalVisible(true);
+  };
 
-    const puntuacionStr = prompt("⭐ Puntuación (1–10):");
-    if (puntuacionStr === null) return;
-
-    const puntuacion = parseInt(puntuacionStr, 10);
+  const guardarContenido = async () => {
+    const puntuacion = parseInt(puntuacionInput, 10);
     if (!puntuacion || puntuacion < 1 || puntuacion > 10) {
       alert("❌ Puntuación inválida.");
       return;
     }
 
-    const comentario = prompt("💬 Comentario (opcional):");
-    if (comentario === null) return;
+    if (!modalItem || !tipoGuardadoModal) return;
 
     try {
-      
       const res = await fetch("http://localhost:3001/contenido/agregar", {
-        
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id_usuario: userId,
-          id_api: item.id,
-          tipoGuardado, // solo por ver en backend si llega
+          id_api: modalItem.id,
+          tipoGuardado: tipoGuardadoModal,
         }),
-        
       });
-
-      console.log("📤 Enviado a /contenido/agregar:", {
-        id_usuario: userId,
-        id_api: item.id,
-        tipoGuardado,
-      });
-      
-      
-
 
       const result = await res.json();
       if (!res.ok) {
-        console.log("❌ Error en agregar:", result);
         alert("❌ Error: " + result.error);
         return;
       }
-      
 
-      const calificacionRes = await fetch("http://localhost:3001/contenido/calificar", {
+      await fetch("http://localhost:3001/contenido/calificar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id_usuario: userId,
-          id_api: item.id,
-          tipo: item.media_type === "movie" ? "pelicula" : "serie",
+          id_api: modalItem.id,
+          tipo: modalItem.media_type === "movie" ? "pelicula" : "serie",
           puntuacion,
-          comentario,
-          tipoGuardado,
+          comentario: comentarioInput,
+          tipoGuardado: tipoGuardadoModal,
         }),
       });
-
-      const calificacionResult = await calificacionRes.json();
-      console.log("📦 Calificación respuesta:", calificacionResult);
 
       alert("✅ Guardado correctamente");
     } catch (err) {
       console.error("❌ Error de red:", err);
+    } finally {
+      setModalVisible(false);
+      setModalItem(null);
+      setTipoGuardadoModal(null);
+      setPuntuacionInput("");
+      setComentarioInput("");
     }
   };
 
@@ -136,13 +132,20 @@ export default function Buscador() {
         >
           + Historial
         </button>
-
       </div>
     </div>
   );
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
+      {nick && (
+        <button
+          onClick={() => navigate(`/perfil/${nick}`)}
+          className="mb-4 bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded"
+        >
+          ← Volver al perfil
+        </button>
+      )}
       <h1 className="text-2xl font-bold mb-4">Resultados de búsqueda</h1>
       {loading ? (
         <p className="text-center text-gray-500">🔄 Cargando...</p>
@@ -152,6 +155,26 @@ export default function Buscador() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
           {resultados.map(renderTarjeta)}
         </div>
+      )}
+
+      {modalVisible && modalItem && tipoGuardadoModal && (
+        <ModalPuntuacion
+          isOpen={modalVisible}
+          onClose={() => {
+            setModalVisible(false);
+            setModalItem(null);
+            setTipoGuardadoModal(null);
+            setPuntuacionInput("");
+            setComentarioInput("");
+          }}
+          item={modalItem}
+          tipo={tipoGuardadoModal}
+          onSubmit={guardarContenido}
+          puntuacion={puntuacionInput}
+          setPuntuacion={setPuntuacionInput}
+          comentario={comentarioInput}
+          setComentario={setComentarioInput}
+        />
       )}
     </div>
   );

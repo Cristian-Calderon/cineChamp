@@ -22,11 +22,12 @@ export default function ListaContenido() {
   const [userId, setUserId] = useState<number | null>(null);
   const [items, setItems] = useState<Movie[]>([]);
   const [allIds, setAllIds] = useState<number[]>([]);
+  const [filtro, setFiltro] = useState("");
 
-  // Título dinámico
-  const titulo = section === "favoritos"
-    ? `🎉 Favoritos – ${media_type === "movie" ? "Películas" : "Series"}`
-    : `🕘 Historial – ${media_type === "movie" ? "Películas" : "Series"}`;
+  const titulo =
+    section === "favoritos"
+      ? `🎉 Favoritos – ${media_type === "movie" ? "Películas" : "Series"}`
+      : `🕘 Historial – ${media_type === "movie" ? "Películas" : "Series"}`;
 
   // 1) Obtener userId a partir del nick
   useEffect(() => {
@@ -41,8 +42,8 @@ export default function ListaContenido() {
       .get<{ id: number }>(`http://localhost:3001/api/usuarios/nick/${nick}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then(res => setUserId(res.data.id))
-      .catch(err => {
+      .then((res) => setUserId(res.data.id))
+      .catch((err) => {
         console.error("No pudimos resolver el usuario:", err);
         navigate("/login", { replace: true });
       });
@@ -60,42 +61,55 @@ export default function ListaContenido() {
     fetch(`http://localhost:3001/contenido/${section}/${userId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error("Falló la carga de contenido");
         return res.json() as Promise<Movie[]>;
       })
-      .then(data => {
-        // filtramos por movie|tv
-        const filtered = data.filter(item => item.media_type === media_type);
+      .then((data) => {
+        const filtered = data.filter(
+          (item) => item.media_type === media_type
+        );
         setItems(filtered);
-
-        // extraemos todas las IDs
-        setAllIds(filtered.map(item => item.id));
+        setAllIds(filtered.map((item) => item.id));
       })
-      .catch(err => console.error("Error cargando contenido:", err));
+      .catch((err) => console.error("Error cargando contenido:", err));
   }, [userId, section, media_type, navigate]);
+
+  // 3) Filtrado dinámico por texto
+  const filtrados = items.filter((item) =>
+    item.title.toLowerCase().includes(filtro.toLowerCase())
+  );
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-4 text-blue-600 hover:underline"
-      >
-        ← Volver
-      </button>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="text-blue-600 hover:underline"
+        >
+          ← Volver
+        </button>
 
-      <h1 className="text-3xl font-bold mb-6">{titulo}</h1>
+        <input
+          type="text"
+          placeholder="🔍 Buscar por título..."
+          value={filtro}
+          onChange={(e) => setFiltro(e.target.value)}
+          className="w-full sm:w-72 border border-gray-300 rounded px-4 py-2"
+        />
+      </div>
 
-      {/* Puedes usar allIds — por ejemplo, en consola */}
+      <h1 className="text-3xl font-bold mb-4">{titulo}</h1>
+
       <pre className="mb-4 text-xs text-gray-500">
         IDs en esta lista: {allIds.join(", ")}
       </pre>
 
-      {items.length === 0 ? (
+      {filtrados.length === 0 ? (
         <p className="text-gray-500">No hay contenido para mostrar.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
-          {items.map((item) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          {filtrados.map((item) => (
             <div
               key={item.id}
               className="border rounded shadow-sm overflow-hidden"

@@ -209,3 +209,11 @@ CHANGE id_biblioteca id_contenidoGuardado INT NOT NULL;
 --Qued apendiente borrar contrains
 ALTER TABLE calificacion DROP INDEX unique_calificacion;
 ALTER TABLE calificacion ADD UNIQUE unique_usuario_api (id_usuario, id_api);
+
+
+--libreria instalada :
+npm install @headlessui/react
+
+--para las alert
+npm install react-hot-toast
+
