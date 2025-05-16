@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 type Movie = {
   id: number;
@@ -21,9 +22,10 @@ export default function Carrusel({ titulo, items, onVerMas }: CarruselProps) {
       <div className="relative overflow-x-auto">
         <div className="flex gap-6 snap-x snap-mandatory scroll-pl-4 overflow-x-auto pb-4 scrollbar-hide">
           {items.slice(0, 10).map((item) => (
-            <div
+            <Link
               key={item.id}
-              className="flex-shrink-0 snap-start w-64  transition-transform transform hover:scale-105"
+              to={`/contenido/${item.media_type}/${item.id}`}
+              className="flex-shrink-0 snap-start w-64 transition-transform transform hover:scale-105"
             >
               <div className="relative group rounded-2xl overflow-hidden shadow-md hover:shadow-xl">
                 <img
@@ -35,7 +37,7 @@ export default function Carrusel({ titulo, items, onVerMas }: CarruselProps) {
                   <p className="text-white text-sm font-semibold truncate">{item.title}</p>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

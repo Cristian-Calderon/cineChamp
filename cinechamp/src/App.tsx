@@ -12,6 +12,7 @@ import EditarPerfil from "./pages/private/EditarPerfil";
 import ListaContenido from "./pages/private/ListaContenido";
 import TodasLasCalificaciones from "./pages/private/Calificaciones";
 import PerfilPublico from "./pages/private/PerfilPublico";
+import PaginaPelicula from "./pages/private/PaginaPelicula";
 
 
 // Verificar ruta /
@@ -82,7 +83,7 @@ export default function App() {
           element={token ? <UsuarioResultado /> : <Navigate to="/login" />}
         />
 
-       
+
         <Route path="/editar-perfil" element={<EditarPerfil />} />
 
 
@@ -102,6 +103,8 @@ export default function App() {
           path="/usuario/:nick/Calificaciones"
           element={token ? <TodasLasCalificaciones /> : <Navigate to="/login" replace />}
         />
+
+        <Route path="/contenido/:tipo/:id" element={<PaginaPelicula />} />
 
 
 

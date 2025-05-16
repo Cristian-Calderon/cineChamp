@@ -257,9 +257,116 @@ const obtenerCalificacionesDelUsuario = async (req, res) => {
     console.error('❌ Error al obtener calificaciones del usuario:', error);
     res.status(500).json({ error: 'Error interno al obtener calificaciones' });
   }
+
+  const obtenerDetallesCompletos = async (req, res) => {
+    const { tipo, id } = req.params;
+  
+    try {
+      const data = await obtenerDetallesPorId(id, tipo); // esta ya la tienes
+  
+      if (!data || data.success === false) {
+        return res.status(404).json({ error: "Contenido no encontrado" });
+      }
+  
+      // Obtener reparto desde TMDB
+      const response = await fetch(`${BASE_URL}/${tipo}/${id}/credits?api_key=${API_KEY}`);
+      const credits = await response.json();
+  
+      const reparto = credits.cast?.slice(0, 10).map(actor => ({
+        nombre: actor.name,
+        personaje: actor.character,
+        foto: actor.profile_path
+          ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
+          : null
+      })) || [];
+  
+      const resultado = {
+        id: data.id,
+        titulo: data.title || data.name,
+        sinopsis: data.overview,
+        fecha: data.release_date || data.first_air_date,
+        posterUrl: data.poster_path
+          ? `https://image.tmdb.org/t/p/w500${data.poster_path}`
+          : null,
+        rating: data.vote_average,
+        reparto
+      };
+  
+      res.json(resultado);
+    } catch (error) {
+      console.error("❌ Error al obtener detalles completos:", error);
+      res.status(500).json({ error: "Error interno" });
+    }
+  };
+
 };
 
+const obtenerDetallesCompletos = async (req, res) => {
+  const { tipo, id } = req.params;
 
+  try {
+    const data = await obtenerDetallesPorId(id, tipo); // esta ya la tienes
+
+    if (!data || data.success === false) {
+      return res.status(404).json({ error: "Contenido no encontrado" });
+    }
+
+    // Obtener reparto desde TMDB
+    const response = await fetch(`${BASE_URL}/${tipo}/${id}/credits?api_key=${API_KEY}`);
+    const credits = await response.json();
+
+    const reparto = credits.cast?.slice(0, 10).map(actor => ({
+      nombre: actor.name,
+      personaje: actor.character,
+      foto: actor.profile_path
+        ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
+        : null
+    })) || [];
+
+    const resultado = {
+      id: data.id,
+      titulo: data.title || data.name,
+      sinopsis: data.overview,
+      fecha: data.release_date || data.first_air_date,
+      posterUrl: data.poster_path
+        ? `https://image.tmdb.org/t/p/w500${data.poster_path}`
+        : null,
+      rating: data.vote_average,
+      reparto
+    };
+
+    res.json(resultado);
+  } catch (error) {
+    console.error("❌ Error al obtener detalles completos:", error);
+    res.status(500).json({ error: "Error interno" });
+  }
+};
+
+const obtenerResenasPorContenido = async (req, res) => {
+  const { id_api } = req.params;
+
+  try {
+    const [rows] = await db.query(
+      `SELECT c.puntuacion, c.comentario, u.nick, u.avatar
+       FROM calificacion c
+       JOIN usuario u ON c.id_usuario = u.id
+       WHERE c.id_api = ?`,
+      [id_api]
+    );
+
+    const media =
+    rows.length > 0
+      ? (rows.reduce((acc, r) => acc + r.puntuacion, 0) / rows.length).toFixed(1)
+      : null;
+
+
+
+    res.json({ media, reseñas: rows });
+  } catch (error) {
+    console.error("❌ Error al obtener reseñas:", error);
+    res.status(500).json({ error: "Error interno al obtener reseñas" });
+  }
+};
 
 
 
@@ -273,5 +380,7 @@ module.exports = {
   obtenerHistorialPorUsuario,
   obtenerFavoritosPorUsuario,
   calificarContenido,
-  obtenerCalificacionesDelUsuario
+  obtenerCalificacionesDelUsuario,
+  obtenerDetallesCompletos,
+  obtenerResenasPorContenido
 };

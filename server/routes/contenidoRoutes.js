@@ -10,7 +10,9 @@ const {
   obtenerHistorialPorUsuario,
   obtenerFavoritosPorUsuario,
   calificarContenido,
-  obtenerCalificacionesDelUsuario
+  obtenerCalificacionesDelUsuario,
+  obtenerDetallesCompletos,
+  obtenerResenasPorContenido
 } = require('../controllers/contenidoController');
 
 
@@ -35,6 +37,11 @@ router.get('/historial/:id_usuario', obtenerHistorialPorUsuario);
 //para la calificacion y comentario
 router.post('/calificar', calificarContenido);
 router.get('/usuarios/:id_usuario/calificaciones', obtenerCalificacionesDelUsuario);
+
+
+router.get("/detalles/:tipo/:id", obtenerDetallesCompletos);
+router.get("/comentarios/:id_api", obtenerResenasPorContenido);
+
 
 
 module.exports = router;

@@ -56,3 +56,6 @@ app.get('/api/logros/forzar/:id', async (req, res) => {
   await verificarLogros(id);
   res.send(`Verificación forzada para usuario ${id}`);
 });
+
+
+app.use('/api/contenido', contenidoRoutes); 
