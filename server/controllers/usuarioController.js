@@ -110,13 +110,13 @@ async function obtenerUsuarioPorNick(req, res) {
 }
 
 async function buscarUsuariosPorNick(req, res) {
-  const { nick } = req.query;
+  const { nick, userId } = req.query;
   if (!nick) return res.status(400).json({ error: "Falta el nick" });
 
   try {
     const [rows] = await db.query(
-      'SELECT id, nick, avatar FROM usuario WHERE nick LIKE ?',
-      [`%${nick}%`]
+      'SELECT id, nick, avatar FROM usuario WHERE nick LIKE ? AND id != ?',
+      [`%${nick}%`, userId]
     );
     res.json(rows);
   } catch (error) {

@@ -61,7 +61,7 @@ async function estadoRelacion(req, res) {
   const { usuarioId, amigoId } = req.query;
   try {
     const estado = await Amigos.obtenerEstadoRelacion(usuarioId, amigoId);
-    res.json({ estado });
+    res.json({ estado : estado || "ninguno" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
