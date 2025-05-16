@@ -24,7 +24,7 @@ app.use('/api/logros', logrosRoutes);
 
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/contenido', contenidoRoutes); 
-
+app.use('/api/contenido', contenidoRoutes); 
 
 // Ruta raíz
 app.get('/', (req, res) => {

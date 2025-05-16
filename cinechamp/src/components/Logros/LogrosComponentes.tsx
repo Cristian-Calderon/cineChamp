@@ -28,8 +28,7 @@ export default function LogrosComponentes({ achievements }: LogrosPreviewProps) 
             <img
               src={logro.image_url}
               alt={logro.title}
-              className={`w-[50px] h-[50px] object-contain border rounded shadow-md ${logro.unlocked ? '' : 'grayscale opacity-50'
-                }`}
+              className="w-[50px] h-[50px] object-contain border rounded shadow-md"
             />
             <span className="text-xs mt-1">{logro.title}</span>
           </div>

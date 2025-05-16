@@ -9,7 +9,7 @@ import UsuarioResultado from "./pages/private/UsuarioResultado";
 import BuscarUsuario from "./pages/private/BuscarUsuario";
 import EditarPerfil from "./pages/private/EditarPerfil";
 import ListaContenido from "./pages/private/ListaContenido";
-
+import TodasLasCalificaciones from "./pages/private/Calificaciones";
 import PerfilPublico from "./pages/private/PerfilPublico";
 
 
@@ -96,8 +96,28 @@ export default function App() {
         />
 
         <Route path="*" element={<Navigate to="/" />} />
+
+        <Route
+          path="/usuario/:nick/Calificaciones"
+          element={token ? <TodasLasCalificaciones /> : <Navigate to="/login" replace />}
+        />
+
+
+
+
       </Routes>
+
+
+
+
     </BrowserRouter>
+
+
+
+
+
+
+
   );
 }
 
