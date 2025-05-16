@@ -19,7 +19,7 @@ router.post('/login', UsuarioController.login);
 router.get('/nick/:nick', UsuarioController.obtenerUsuarioPorNick);
 
 router.put('/:id', UsuarioController.actualizarUsuario);
-router.get("/usuarios/buscar", UsuarioController.buscarUsuariosPorNick);
+router.get("/buscar", UsuarioController.buscarUsuariosPorNick);
 router.get('/:id', UsuarioController.obtenerUsuarioPorId);
 
 
