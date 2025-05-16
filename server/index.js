@@ -13,6 +13,8 @@ const { verificarLogros } = require('./controllers/logrosController.js');
 const app = express();
 app.use(express.static('public'));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
+app.use("/uploads", express.static(path.join(__dirname, "/server/assets/uploads")));
+
 
 
 

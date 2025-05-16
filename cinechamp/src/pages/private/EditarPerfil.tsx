@@ -1,4 +1,3 @@
-// src/pages/private/EditarPerfil.tsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -6,7 +5,8 @@ export default function EditarPerfil() {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<number | null>(null);
   const [nick, setNick] = useState("");
-  const [avatar, setAvatar] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState(""); // Para la URL
+  const [avatarFile, setAvatarFile] = useState<File | null>(null); // Para archivo subido
   const [original, setOriginal] = useState({ nick: "", avatar: "" });
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function EditarPerfil() {
       .then((res) => res.json())
       .then((user) => {
         setNick(user.nick);
-        setAvatar(user.avatar || "");
+        setAvatarUrl(user.avatar || "");
         setOriginal({ nick: user.nick, avatar: user.avatar || "" });
       })
       .catch(() => navigate("/login"));
@@ -34,15 +34,18 @@ export default function EditarPerfil() {
   const handleSave = async () => {
     if (!userId) return;
 
-    const cambios: any = {};
-    if (nick && nick !== original.nick) cambios.nick = nick;
-    if (avatar && avatar !== original.avatar) cambios.avatar = avatar;
+    const formData = new FormData();
+    if (nick && nick !== original.nick) formData.append("nick", nick);
 
+    if (avatarFile) {
+      formData.append("avatar", avatarFile); // Archivo
+    } else if (avatarUrl && avatarUrl !== original.avatar) {
+      formData.append("avatar", avatarUrl); // URL directa
+    }
 
     const res = await fetch(`http://localhost:3001/api/usuarios/${userId}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(cambios),
+      body: formData,
     });
 
     const data = await res.json();
@@ -67,9 +70,25 @@ export default function EditarPerfil() {
 
       <label className="block font-semibold mb-1">Avatar (URL)</label>
       <input
-        value={avatar}
-        onChange={(e) => setAvatar(e.target.value)}
-        className="border p-2 rounded w-full mb-4"
+        value={avatarUrl}
+        onChange={(e) => {
+          setAvatarUrl(e.target.value);
+          setAvatarFile(null); // Si escribe URL, anula archivo
+        }}
+        className="border p-2 rounded w-full mb-2"
+      />
+
+      <label className="block font-semibold mb-1">o Subir nueva imagen</label>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          if (e.target.files?.[0]) {
+            setAvatarFile(e.target.files[0]);
+            setAvatarUrl(""); // Si sube archivo, anula URL
+          }
+        }}
+        className="mb-4"
       />
 
       <div className="flex gap-2">

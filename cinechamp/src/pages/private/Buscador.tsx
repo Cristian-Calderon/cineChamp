@@ -40,52 +40,74 @@ export default function Buscador() {
     }
   };
 
-  const manejarAgregar = async (item: Resultado) => {
+  const manejarAgregar = async (item: Resultado, tipoGuardado: "favorito" | "historial") => {
+    console.log("Guardando como:", tipoGuardado, item);
+
     const puntuacionStr = prompt("⭐ Puntuación (1–10):");
-    //condicion por si canecela
-    if (puntuacionStr === null) return; 
+    if (puntuacionStr === null) return;
 
     const puntuacion = parseInt(puntuacionStr, 10);
     if (!puntuacion || puntuacion < 1 || puntuacion > 10) {
       alert("❌ Puntuación inválida.");
       return;
     }
-  
+
     const comentario = prompt("💬 Comentario (opcional):");
-    //condicion por si cancela
-    if (comentario === null) return; 
-  
-    // Solo aquí haces fetch una vez todo está validado
-    const res = await fetch("http://localhost:3001/contenido/agregar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    if (comentario === null) return;
+
+    try {
+      
+      const res = await fetch("http://localhost:3001/contenido/agregar", {
+        
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id_usuario: userId,
+          id_api: item.id,
+          tipoGuardado, // solo por ver en backend si llega
+        }),
+        
+      });
+
+      console.log("📤 Enviado a /contenido/agregar:", {
         id_usuario: userId,
         id_api: item.id,
-      }),
-    });
-  
-    const result = await res.json();
-    if (!res.ok) {
-      alert("❌ Error: " + result.error);
-      return;
+        tipoGuardado,
+      });
+      
+      
+
+
+      const result = await res.json();
+      if (!res.ok) {
+        console.log("❌ Error en agregar:", result);
+        alert("❌ Error: " + result.error);
+        return;
+      }
+      
+
+      const calificacionRes = await fetch("http://localhost:3001/contenido/calificar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id_usuario: userId,
+          id_api: item.id,
+          tipo: item.media_type === "movie" ? "pelicula" : "serie",
+          puntuacion,
+          comentario,
+          tipoGuardado,
+        }),
+      });
+
+      const calificacionResult = await calificacionRes.json();
+      console.log("📦 Calificación respuesta:", calificacionResult);
+
+      alert("✅ Guardado correctamente");
+    } catch (err) {
+      console.error("❌ Error de red:", err);
     }
-  
-    await fetch("http://localhost:3001/contenido/calificar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id_usuario: userId,
-        id_api: item.id,
-        tipo: item.media_type === "movie" ? "pelicula" : "serie",
-        puntuacion,
-        comentario,
-      }),
-    });
-  
-    alert("✅ Guardado correctamente");
   };
-  
+
   const renderTarjeta = (item: Resultado) => (
     <div key={item.id} className="border rounded p-2 shadow-sm text-center">
       {item.poster_path ? (
@@ -103,17 +125,18 @@ export default function Buscador() {
       <p className="text-xs text-blue-600 font-medium">{item.media_type === "movie" ? "Película" : "Serie"}</p>
       <div className="flex flex-col gap-2 mt-2">
         <button
-          onClick={() => manejarAgregar(item)}
+          onClick={() => manejarAgregar(item, "favorito")}
           className="bg-green-500 text-white rounded px-2 py-1 text-sm"
         >
           + Favorito
         </button>
         <button
-          onClick={() => manejarAgregar(item)}
+          onClick={() => manejarAgregar(item, "historial")}
           className="bg-yellow-500 text-white rounded px-2 py-1 text-sm"
         >
           + Historial
         </button>
+
       </div>
     </div>
   );

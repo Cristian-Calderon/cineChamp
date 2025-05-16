@@ -27,6 +27,7 @@ type Achievement = {
   title: string;
   description: string;
   image_url: string;
+  unlocked: boolean;
 };
 
 type UserResponse = {
@@ -61,8 +62,6 @@ type Calificacion = {
   posterUrl: string;
 };
 
-
-
 export default function Perfil({ onLogout }: PerfilProps) {
   const { nick } = useParams();
   const location = useLocation();
@@ -72,13 +71,10 @@ export default function Perfil({ onLogout }: PerfilProps) {
   const [favorites, setFavorites] = useState<Movie[]>([]);
   const [historial, setHistorial] = useState<Movie[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [query, setQuery] = useState("");
-  const [nickAmigo, setNickAmigo] = useState("");
   const [userId, setUserId] = useState<number | null>(null);
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [amigos, setAmigos] = useState<Amigo[]>([]);
-  const [calificaciones, setCalificaciones] = useState<Calificacion[]>([])
-
+  const [calificaciones, setCalificaciones] = useState<Calificacion[]>([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -93,7 +89,6 @@ export default function Perfil({ onLogout }: PerfilProps) {
       .catch(console.error);
   }, [userId]);
 
-
   useEffect(() => {
     if (!nick) return;
     const token = localStorage.getItem("token");
@@ -104,13 +99,10 @@ export default function Perfil({ onLogout }: PerfilProps) {
       })
       .then((res) => {
         const user = res.data;
-        const defaultAvatar = "https://i.pravatar.cc/150?img=3";
-        const avatarUrl = user.avatar && user.avatar.trim() !== "" ? user.avatar : defaultAvatar;
-
         setUserId(user.id);
         setProfile({
           name: user.nick,
-          photoUrl: avatarUrl,
+          photoUrl: user.avatar || "",
         });
       })
       .catch((err) => {
@@ -165,14 +157,10 @@ export default function Perfil({ onLogout }: PerfilProps) {
     if (!nick || !token || !userId) return;
 
     try {
-      // 🧠 Primero forza verificación
       await fetch(`http://localhost:3001/api/logros/forzar/${userId}`);
-
-      // 📥 Luego carga los logros actualizados
       const res = await fetch(`http://localhost:3001/api/logros/${nick}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const nuevos = await res.json();
       setAchievements(nuevos);
     } catch (err) {
@@ -180,8 +168,6 @@ export default function Perfil({ onLogout }: PerfilProps) {
     }
   };
 
-
-  // ✅ Cargar logros al inicio Y si ?refrescar=1 está en la URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const necesitaRecarga = params.get("refrescar") === "1";
@@ -190,16 +176,6 @@ export default function Perfil({ onLogout }: PerfilProps) {
     }
     cargarLogros();
   }, [nick, userId, location.search]);
-
-  const buscarPeliculas = () => {
-    if (!query || !nick) return;
-    navigate(`/id/${nick}/buscador?q=${encodeURIComponent(query)}`);
-  };
-
-  const buscarAmigo = () => {
-    if (!nickAmigo) return;
-    navigate(`/usuario/resultado?nick=${encodeURIComponent(nickAmigo)}`);
-  };
 
   const aceptarSolicitud = async (amigoId: number) => {
     const res = await fetch(`http://localhost:3001/api/amigos/solicitud/${amigoId}/aceptar`, {
@@ -221,27 +197,35 @@ export default function Perfil({ onLogout }: PerfilProps) {
 
   return (
     <div className="p-6 w-full">
-       
-
-      {/* Perfil y buscadores */}
       <div className="w-full bg-stone-500 border rounded-xl p-4 shadow-md mb-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
-      <img src={logo} alt="CineChamp Logo" className="h-30  w-40 object-contain" />
+        <img
+          src={logo}
+          alt="CineChamp Logo"
+          className="h-30 w-40 object-contain cursor-pointer"
+          onClick={() => {
+            const storedNick = localStorage.getItem("nick");
+            if (storedNick) {
+              navigate(`/id/${storedNick}`);
+            } else {
+              navigate("/");
+            }
+          }}
+        />
+
         <PerfilHeader
           photoUrl={profile.photoUrl}
           name={profile.name}
-          onLogout={handleLogout}
           onEditProfile={() => navigate("/editar-perfil")}
-          
+          onLogout={handleLogout}
         />
 
         <BuscadorUnificado
           onBuscarPeliculas={(query) => navigate(`/id/${nick}/buscador?q=${encodeURIComponent(query)}`)}
           onBuscarAmigo={(nickAmigo) => navigate(`/usuario/resultado?nick=${encodeURIComponent(nickAmigo)}`)}
         />
-      </div> {/* ✅ Cierre correcto del contenedor de cabecera + buscador */}
+      </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Izquierda: Historial y Favoritos */}
         <div className="w-full lg:w-4/6">
           <Carrusel
             titulo="🎬 Historial - Películas"
@@ -265,7 +249,6 @@ export default function Perfil({ onLogout }: PerfilProps) {
           />
         </div>
 
-        {/* Derecha: Logros, Amigos, Calificaciones, Solicitudes */}
         <div className="w-full lg:w-1/2 space-y-4">
           <LogrosPreview achievements={achievements} />
           <AmigosComponentes amigos={amigos} />

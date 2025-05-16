@@ -5,6 +5,7 @@ type Achievement = {
   title: string;
   description: string;
   image_url: string;
+  unlocked: boolean;
 };
 
 type LogrosPreviewProps = {
@@ -24,7 +25,12 @@ export default function LogrosComponentes({ achievements }: LogrosPreviewProps) 
       <div className="flex gap-4">
         {primeros.map((logro) => (
           <div key={logro.id} className="w-20 flex flex-col items-center text-center" title={logro.description}>
-            <img src={logro.image_url} alt={logro.title} className="w-[50px] h-[50px] object-contain border rounded shadow-md" />
+            <img
+              src={logro.image_url}
+              alt={logro.title}
+              className={`w-[50px] h-[50px] object-contain border rounded shadow-md ${logro.unlocked ? '' : 'grayscale opacity-50'
+                }`}
+            />
             <span className="text-xs mt-1">{logro.title}</span>
           </div>
         ))}

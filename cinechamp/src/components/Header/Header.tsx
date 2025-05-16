@@ -1,21 +1,26 @@
 import { useNavigate } from "react-router-dom";
+import logo from "../../assets/imagen-header-logo/LogoCineChamp.png";
 
 export default function Header() {
   const navigate = useNavigate();
 
+  const handleLogoClick = () => {
+    const nick = localStorage.getItem("nick");
+    if (nick) {
+      navigate(`/id/${nick}`);
+    } else {
+      navigate("/");
+    }
+  };
+
   return (
     <header className="w-full flex items-center justify-between p-4 shadow-md bg-white">
-      <div
-        className="cursor-pointer flex items-center gap-2"
-        onClick={() => navigate("/")}
-      >
-       <img
-          src="../../assets/imagen-header-logo/LogoCineChamp.png" 
-          alt="CineChamp Logo"
-          className="h-30 w-auto max-w-[200px] object-contain"
-        />
-
-      </div>
+      <img
+        src={logo}
+        alt="CineChamp Logo"
+        className="h-20 w-auto object-contain cursor-pointer"
+        onClick={handleLogoClick}
+      />
     </header>
   );
 }

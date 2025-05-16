@@ -9,14 +9,17 @@ const { asignarLogro } = require('./logrosController'); // ajusta ruta si está 
 
 async function registrar(req, res) {
   try {
-    const { nick, email, contraseña, avatar } = req.body;
+    const { nick, email, contraseña } = req.body;
     const hashed = await bcrypt.hash(contraseña, 10);
+
+    // Si hay imagen, guarda la ruta; si no, deja null o string vacío
+    const avatar = req.file ? "/uploads/" + req.file.filename : null;
+
     const id = await Usuario.crearUsuario(nick, email, hashed, avatar);
 
-    
-    await asignarLogro(id, 21); 
-    
-    res.status(201).json({ message: 'Usuario creado', id });
+    await asignarLogro(id, 21); // ejemplo: logro por registrarse
+
+    res.status(201).json({ message: "Usuario creado", id });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -49,10 +52,17 @@ async function login(req, res) {
 async function actualizarUsuario(req, res) {
   try {
     const { id } = req.params;
-    const { nick, avatar } = req.body;
+    const { nick } = req.body;
+
+    // avatar puede venir como nuevo archivo o como URL del frontend
+    const avatar = req.file ? "/uploads/" + req.file.filename : req.body.avatar || null;
+
     const actualizado = await Usuario.actualizarUsuario(id, nick, avatar);
-    if (actualizado === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
-    res.json({ message: 'Usuario actualizado correctamente' });
+
+    if (actualizado === 0)
+      return res.status(404).json({ error: "Usuario no encontrado" });
+
+    res.json({ message: "Usuario actualizado correctamente" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
