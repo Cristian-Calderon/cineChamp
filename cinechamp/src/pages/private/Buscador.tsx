@@ -105,33 +105,45 @@ export default function Buscador() {
   };
 
   const renderTarjeta = (item: Resultado) => (
-    <div key={item.id} className="border rounded p-2 shadow-sm text-center">
+    <div
+      key={item.id}
+      className="relative border rounded-xl shadow hover:shadow-lg transition p-2 bg-white"
+    >
       {item.poster_path ? (
         <img
           src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
           alt={item.title || item.name}
-          className="w-full h-[100px] object-cover rounded mb-2"
+          className="w-full h-[200px] object-cover rounded-xl"
         />
       ) : (
-        <div className="w-full h-[100px] bg-gray-200 flex items-center justify-center mb-2 rounded">
+        <div className="w-full h-[200px] bg-gray-200 rounded-xl flex items-center justify-center">
           <span className="text-sm text-gray-600">Sin imagen</span>
         </div>
       )}
-      <p className="text-sm font-semibold">{item.title || item.name}</p>
-      <p className="text-xs text-blue-600 font-medium">{item.media_type === "movie" ? "Película" : "Serie"}</p>
-      <div className="flex flex-col gap-2 mt-2">
+
+      <div className="absolute top-2 right-2 flex flex-col gap-2">
         <button
           onClick={() => manejarAgregar(item, "favorito")}
-          className="bg-green-500 text-white rounded px-2 py-1 text-sm"
-        >
-          + Favorito
-        </button>
+          title="Agregar a favoritos"
+          className="bg-white/80 hover:bg-white text-red-500 p-2 rounded-full shadow transition hover:scale-105"
+        >❤️</button>
         <button
           onClick={() => manejarAgregar(item, "historial")}
-          className="bg-yellow-500 text-white rounded px-2 py-1 text-sm"
-        >
-          + Historial
-        </button>
+          title="Agregar a historial"
+          className="bg-white/80 hover:bg-white text-blue-500 p-2 rounded-full shadow transition hover:scale-105"
+        >📜</button>
+        <button
+          onClick={() => navigate(`/contenido/${item.media_type}/${item.id}`)}
+          title="Ver detalles"
+          className="bg-white/80 hover:bg-white text-gray-700 p-2 rounded-full shadow transition hover:scale-105"
+        >▶️</button>
+      </div>
+
+      <div className="mt-3 text-center">
+        <p className="text-sm font-semibold truncate">{item.title || item.name}</p>
+        <p className="text-xs text-blue-600">
+          {item.media_type === "movie" ? "Película" : "Serie"}
+        </p>
       </div>
     </div>
   );
