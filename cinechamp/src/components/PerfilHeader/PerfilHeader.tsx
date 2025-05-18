@@ -20,29 +20,30 @@ export default function PerfilHeader({
   onEliminarAmigo,
 }: PerfilHeaderProps) {
   return (
-    <div className="w-full bg-white border rounded-xl p-4 shadow-md mb-10">
-      <div className="flex items-center gap-4">
-        {/* Avatar */}
-        <div className="w-20 h-20 border-4 border-gray-300 rounded-full overflow-hidden">
-          <Avatar src={photoUrl} size={80} />
-        </div>
+    <div className="w-full bg-white border rounded-xl p-4 shadow-md mb-10 text-black">
+      <div className="flex items-center gap-6">
+        {/* Avatar grande cuadrado */}
+        <Avatar
+          src={photoUrl}
+          className="rounded-sm w-36 h-36 border-4 border-gray-300"
+        />
 
         {/* Info */}
         <div>
-          <p className="text-lg font-semibold">{name}</p>
+          <p className="text-xl font-bold">{name}</p>
 
           {/* Botones perfil propio */}
           {onEditProfile && onLogout && (
-            <div className="mt-2 flex gap-2 flex-wrap">
+            <div className="mt-3 flex gap-3 flex-wrap">
               <button
                 onClick={onEditProfile}
-                className="bg-indigo-600 text-white px-3 py-1 rounded text-sm"
+                className="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700 transition"
               >
                 Editar Perfil
               </button>
               <button
                 onClick={onLogout}
-                className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+                className="bg-red-500 text-white px-4 py-2 rounded text-sm hover:bg-red-600 transition"
               >
                 Cerrar sesión
               </button>
@@ -53,7 +54,7 @@ export default function PerfilHeader({
           {estadoRelacion === "ninguna" && onAgregarAmigo && (
             <button
               onClick={onAgregarAmigo}
-              className="mt-2 bg-blue-600 text-white px-3 py-1 rounded text-sm"
+              className="mt-3 bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
             >
               Agregar amigo
             </button>
@@ -61,13 +62,13 @@ export default function PerfilHeader({
           {estadoRelacion === "amigos" && onEliminarAmigo && (
             <button
               onClick={onEliminarAmigo}
-              className="mt-2 bg-red-600 text-white px-3 py-1 rounded text-sm"
+              className="mt-3 bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition"
             >
               Eliminar amigo
             </button>
           )}
           {estadoRelacion === "pendiente" && (
-            <p className="mt-2 text-sm text-gray-500">Solicitud enviada</p>
+            <p className="mt-3 text-sm text-gray-500">Solicitud enviada</p>
           )}
         </div>
       </div>
