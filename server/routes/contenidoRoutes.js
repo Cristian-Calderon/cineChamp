@@ -12,7 +12,8 @@ const {
   calificarContenido,
   obtenerCalificacionesDelUsuario,
   obtenerDetallesCompletos,
-  obtenerResenasPorContenido
+  obtenerResenasPorContenido,
+  eliminarContenidoController
 } = require('../controllers/contenidoController');
 
 
@@ -42,6 +43,7 @@ router.get('/usuarios/:id_usuario/calificaciones', obtenerCalificacionesDelUsuar
 router.get("/detalles/:tipo/:id", obtenerDetallesCompletos);
 router.get("/comentarios/:id_api", obtenerResenasPorContenido);
 
+router.delete("/eliminar", eliminarContenidoController);
 
 
 module.exports = router;

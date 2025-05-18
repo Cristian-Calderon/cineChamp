@@ -196,7 +196,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
   };
 
   return (
-    <div className="p-6 w-full">
+    <div className="min-h-screen w-full bg-gradient-to-br from-teal-100 via-slate-50 to-black text-white p-6">
       <div className="w-full bg-stone-500 border rounded-xl p-4 shadow-md mb-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
         <img
           src={logo}
