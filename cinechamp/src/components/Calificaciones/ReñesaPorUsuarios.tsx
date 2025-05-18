@@ -27,15 +27,7 @@ type Resena = {
   
     return (
       <div className="mt-10 flex flex-col md:flex-row gap-6">
-        {/* Cuadro de nota media */}
-        {media && (
-          <div className="md:w-1/3 bg-yellow-100 border border-yellow-300 rounded-xl p-6 text-center shadow-md">
-            <h3 className="text-xl font-semibold text-yellow-800 mb-2">⭐ Nota media</h3>
-            <p className="text-5xl font-bold text-yellow-600">{media}</p>
-            <p className="text-gray-600 text-sm mt-2">Según {resenas.length} reseña(s)</p>
-          </div>
-        )}
-  
+    
         {/* Lista de reseñas */}
         <div className="flex-1 bg-white rounded-2xl p-6 shadow">
           <h2 className="text-xl font-semibold mb-4">🗣 Reseñas de usuarios</h2>
