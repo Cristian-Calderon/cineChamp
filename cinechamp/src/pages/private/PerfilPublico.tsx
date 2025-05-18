@@ -138,7 +138,7 @@ export default function PerfilPublico() {
         <PerfilHeader
           photoUrl={profile.photoUrl}
           name={profile.name}
-          estadoRelacion={estadoRelacion ?? undefined}
+          estadoRelacion={estadoRelacion}
           onAgregarAmigo={enviarSolicitudAmistad}
           onEliminarAmigo={eliminarAmistad}
         />

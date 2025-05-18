@@ -251,7 +251,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
 
         <div className="w-full lg:w-1/2 space-y-4">
           <LogrosPreview achievements={achievements} />
-          <AmigosComponentes amigos={amigos} />
+          <AmigosComponentes amigos={amigos} esPropio />
           <UltimasCalificaciones
             calificaciones={calificaciones.map(cal => ({
               ...cal,

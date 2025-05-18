@@ -10,19 +10,24 @@ type Amigo = {
 
 type AmigosPreviewProps = {
   amigos: Amigo[];
+  esPropio?: boolean; // 💡 Nueva prop opcional
 };
 
-export default function AmigosComponente({ amigos }: AmigosPreviewProps) {
+export default function AmigosComponentes({ amigos, esPropio = false }: AmigosPreviewProps) {
   const [verTodos, setVerTodos] = useState(false);
   const navigate = useNavigate();
   const amigosCortos = amigos.slice(0, 6);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-md relative h-[160px] text-black">
-      <h2 className="text-2xl font-semibold mb-4">Amigos</h2>
+    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-md relative h-[180px] text-black">
+      <h2 className="text-2xl font-semibold mb-2">Amigos</h2>
+
+      <p className="text-sm text-gray-500 mb-3">
+        {esPropio ? "Tienes" : "Tiene"} {amigos.length} amigo{amigos.length !== 1 && "s"}
+      </p>
 
       {amigos.length === 0 ? (
-        <p className="text-gray-500">No tienes amigos aún.</p>
+        <p className="text-gray-400 text-sm">{esPropio ? "No tienes amigos aún." : "No tiene amigos aún."}</p>
       ) : (
         <div className="flex gap-4 items-center">
           {amigosCortos.map((amigo) => (
@@ -53,7 +58,9 @@ export default function AmigosComponente({ amigos }: AmigosPreviewProps) {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-lg max-h-[80vh] overflow-y-auto text-black">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold">Todos tus amigos</h3>
+              <h3 className="text-xl font-semibold">
+                {esPropio ? "Todos tus amigos" : `Amigos de ${amigos[0]?.nick || "usuario"}`}
+              </h3>
               <button
                 onClick={() => setVerTodos(false)}
                 className="text-gray-600 text-lg hover:text-gray-800"
