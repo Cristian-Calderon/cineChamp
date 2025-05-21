@@ -16,7 +16,7 @@ type CarruselProps = {
 
 export default function Carrusel({ titulo, items, onVerMas }: CarruselProps) {
   return (
-    <div className="bg-gradient-to-br from-white via-slate-50 to-slate-100 rounded-xl p-5 shadow-lg w-full">
+    <div className="bg-gradient-to-br from-white via-slate-50 to-slate-100 rounded-xl p-5 shadow-lg w-full mb-6">
       <h2 className="text-2xl font-bold mb-4 text-gray-800">{titulo}</h2>
 
       <div className="relative overflow-x-auto">
