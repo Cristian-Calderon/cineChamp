@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import fondoContenido from "../../assets/imagenes/cinema.jpg";
 
 type Movie = {
   id: number;
@@ -113,102 +114,147 @@ export default function ListaContenido() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="text-blue-600 hover:underline"
-        >
-          ← Volver
-        </button>
+    <div
+      className="relative min-h-screen text-white"
+      style={{
+        backgroundImage: `url(${fondoContenido})`,
+        backgroundSize: "cover",
+        backgroundPosition: "top center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
+      }}
+    >
+      {/* Contenido principal */}
+      <div className="relative z-10 p-6 max-w-6xl mx-auto bg-black/40 backdrop-blur-sm rounded-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md transition-transform transform hover:scale-105"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M7.707 14.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L4.414 9H16a1 1 0 110 2H4.414l3.293 3.293a1 1 0 010 1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Volver
+          </button>
 
-        <input
-          type="text"
-          placeholder="🔍 Buscar por título..."
-          value={filtro}
-          onChange={(e) => {
-            setFiltro(e.target.value);
-            setPaginaActual(1); // Reiniciar a página 1
-          }}
-          className="w-full sm:w-72 border border-gray-300 rounded px-4 py-2"
-        />
-      </div>
+          <input
+            type="text"
+            placeholder="🔍 Buscar por título..."
+            value={filtro}
+            onChange={(e) => {
+              setFiltro(e.target.value);
+              setPaginaActual(1);
+            }}
+            className="w-full sm:w-72 border border-gray-300 rounded px-4 py-2 text-black"
+          />
+        </div>
 
-      <h1 className="text-3xl font-bold mb-4">
-        {section === "favoritos"
-          ? `🎉 Favoritos – ${media_type === "movie" ? "Películas" : "Series"}`
-          : `🕘 Historial – ${media_type === "movie" ? "Películas" : "Series"}`}
-      </h1>
+        <h1 className="text-3xl font-bold mb-4">
+          {section === "favoritos"
+            ? `🎉 Favoritos – ${media_type === "movie" ? "Películas" : "Series"}`
+            : `🕘 Historial – ${media_type === "movie" ? "Películas" : "Series"}`}
+        </h1>
 
-      {elementosPagina.length === 0 ? (
-        <p className="text-gray-500">No hay contenido para mostrar.</p>
-      ) : (
-        <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-            {elementosPagina.map((item) => (
-              <div
-                key={item.id}
-                className="border rounded shadow-sm overflow-hidden relative group"
-              >
-                <img
-                  src={item.posterUrl}
-                  alt={item.title}
-                  className="w-full h-48 object-cover"
-                  onClick={() => navigate(`/contenido/${item.media_type}/${item.id}`)}
-                  style={{ cursor: "pointer" }}
-                />
-                <div className="p-2 text-center">
-                  <p className="text-sm font-medium">{item.title}</p>
-                  <p className="text-xs text-blue-600 mt-1">
-                    {item.media_type === "movie" ? "🎬 Película" : "📺 Serie"}
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => eliminarContenido(item.id)}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition text-xs hidden group-hover:block"
-                  title="Eliminar"
+        {elementosPagina.length === 0 ? (
+          <p className="text-gray-300">No hay contenido para mostrar.</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+              {elementosPagina.map((item) => (
+                <div
+                  key={item.id}
+                  className="relative border rounded-xl shadow hover:shadow-lg transition p-2 bg-white text-black"
                 >
-                  ✖
-                </button>
-              </div>
-            ))}
-          </div>
+                  {item.posterUrl ? (
+                    <img
+                      src={item.posterUrl}
+                      alt={item.title}
+                      className="w-full h-[200px] object-cover rounded-xl"
+                      onClick={() =>
+                        navigate(`/contenido/${item.media_type}/${item.id}`)
+                      }
+                      style={{ cursor: "pointer" }}
+                    />
+                  ) : (
+                    <div className="w-full h-[200px] bg-gray-200 rounded-xl flex items-center justify-center">
+                      <span className="text-sm text-gray-600">Sin imagen</span>
+                    </div>
+                  )}
 
-          {/* Paginación */}
-          <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
-            <button
-              onClick={() => cambiarPagina(paginaActual - 1)}
-              disabled={paginaActual === 1}
-              className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-            >
-              ← Anterior
-            </button>
+                  <div className="absolute top-2 right-2">
+                    <button
+                      onClick={() => eliminarContenido(item.id)}
+                      className="absolute top-2 right-2 bg-white text-red-600 p-1.5 rounded-full shadow hover:bg-red-100 transition"
+                      title="Eliminar"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
 
-            {Array.from({ length: totalPaginas }, (_, i) => (
+                  <div className="mt-3 text-center">
+                    <p className="text-sm font-semibold truncate">{item.title}</p>
+                    <p className="text-xs text-blue-600">
+                      {item.media_type === "movie" ? "Película" : "Serie"}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Paginación */}
+            <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
               <button
-                key={i + 1}
-                onClick={() => cambiarPagina(i + 1)}
-                className={`px-3 py-1 rounded ${
-                  paginaActual === i + 1
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
+                onClick={() => cambiarPagina(paginaActual - 1)}
+                disabled={paginaActual === 1}
+                className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded disabled:opacity-50"
               >
-                {i + 1}
+                ← Anterior
               </button>
-            ))}
 
-            <button
-              onClick={() => cambiarPagina(paginaActual + 1)}
-              disabled={paginaActual === totalPaginas}
-              className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-            >
-              Siguiente →
-            </button>
-          </div>
-        </>
-      )}
+              {Array.from({ length: totalPaginas }, (_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => cambiarPagina(i + 1)}
+                  className={`px-3 py-1 rounded ${paginaActual === i + 1
+                    ? "bg-blue-600 text-white"
+                    : "bg-white/20 text-white hover:bg-white/30"
+                    }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={() => cambiarPagina(paginaActual + 1)}
+                disabled={paginaActual === totalPaginas}
+                className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded disabled:opacity-50"
+              >
+                Siguiente →
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
