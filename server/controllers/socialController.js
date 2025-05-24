@@ -83,6 +83,18 @@ async function eliminarAmistad(req, res) {
   }
 }
 
+// Contador de amigos:
+async function contarAmigos(req, res) {
+  const { id } = req.params;
+  try {
+    const total = await Amigos.contarAmigos(id);
+    res.json({ total });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+
 module.exports = {
   enviarSolicitud,
   obtenerSolicitudesPendientes,
@@ -91,4 +103,5 @@ module.exports = {
   obtenerAmigos,
   estadoRelacion,
   eliminarAmistad,
+  contarAmigos,
 };

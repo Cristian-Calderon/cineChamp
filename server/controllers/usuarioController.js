@@ -124,6 +124,19 @@ async function buscarUsuariosPorNick(req, res) {
   }
 }
 
+// Cantidad de calificaciones:
+async function contarCalificaciones(req, res) {
+  try {
+    const { id } = req.params;
+    const [rows] = await db.query(
+      "SELECT COUNT(*) AS total FROM calificacion WHERE id_usuario = ?",
+      [id]
+    );
+    res.json({ total: rows[0].total });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 
 
 module.exports = {
@@ -132,5 +145,7 @@ module.exports = {
   buscarUsuariosPorNick,
   actualizarUsuario,
   obtenerUsuarioPorNick,
-  obtenerUsuarioPorId
+  obtenerUsuarioPorId,
+  contarCalificaciones,
+  
 };

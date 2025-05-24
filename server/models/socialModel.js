@@ -85,6 +85,17 @@ const eliminarAmistad = async (usuarioId, amigoId) => {
   return result.affectedRows;
 };
 
+// Cantidad de amigos:
+const contarAmigos = async (usuarioId) => {
+  const [rows] = await db.query(
+    `SELECT COUNT(*) AS total
+     FROM amigos
+     WHERE (usuario_id = ? OR amigo_id = ?) AND estado = 'aceptado'`,
+    [usuarioId, usuarioId]
+  );
+  return rows[0].total;
+};
+
 module.exports = {
   enviarSolicitud,
   obtenerSolicitudesPendientes,
@@ -93,4 +104,5 @@ module.exports = {
   obtenerAmigos,
   obtenerEstadoRelacion,
   eliminarAmistad,
+  contarAmigos,
 };

@@ -5,6 +5,9 @@ const UsuarioController = require('../controllers/usuarioController');
 const { obtenerCalificacionesDelUsuario } = require('../controllers/contenidoController');
 const upload = require("../utils/multerConfig");
 
+const { contarCalificaciones } = require('../controllers/usuarioController');
+
+
 router.post("/registro", upload.single("avatar"), UsuarioController.registrar);
 router.put("/:id", upload.single("avatar"), UsuarioController.actualizarUsuario);
 
@@ -22,6 +25,7 @@ router.put('/:id', UsuarioController.actualizarUsuario);
 router.get("/buscar", UsuarioController.buscarUsuariosPorNick);
 router.get('/:id', UsuarioController.obtenerUsuarioPorId);
 
+router.get('/contador-calificaciones/:id', contarCalificaciones);
 
 router.get('/usuarios/:id_usuario/calificaciones', obtenerCalificacionesDelUsuario);
 

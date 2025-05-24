@@ -6,7 +6,10 @@ type Usuario = {
   nick: string;
   email: string;
   avatar: string;
+  cantidadAmigos?: number;
+  cantidadCalificaciones?: number;
 };
+
 
 export default function UsuarioResultado() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -41,6 +44,7 @@ export default function UsuarioResultado() {
           setError("");
           setUsuarios(data);
           obtenerEstados(data);
+          obtenerDatosExtra(data);
         }
       })
       .catch((err) => setError(err.message))
@@ -64,6 +68,35 @@ export default function UsuarioResultado() {
     setRelaciones(estadosTemp);
   };
 
+  // Cantidad: 
+  const obtenerDatosExtra = async (usuarios: Usuario[]) => {
+    const usuariosConDatos = await Promise.all(
+      usuarios.map(async (usuario) => {
+        try {
+          const [resAmigos, resCalificaciones] = await Promise.all([
+            fetch(`${apiBase}/api/amigos/contador/${usuario.id}`),
+            fetch(`${apiBase}/api/usuarios/contador-calificaciones/${usuario.id}`)
+          ]);
+
+          const amigosData = await resAmigos.json();
+          const calificacionesData = await resCalificaciones.json();
+
+          return {
+            ...usuario,
+            cantidadAmigos: amigosData.total,
+            cantidadCalificaciones: calificacionesData.total
+          };
+        } catch (err) {
+          console.error(`Error al obtener datos extra de ${usuario.nick}:`, err);
+          return usuario;
+        }
+      })
+    );
+
+    setUsuarios(usuariosConDatos);
+  };
+
+
   const enviarSolicitudAmistad = async (amigoId: number) => {
     const res = await fetch(`${apiBase}/api/amigos/solicitud`, {
       method: "POST",
@@ -86,7 +119,8 @@ export default function UsuarioResultado() {
   };
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
+    <div className="p-6 w-full max-w-screen-xl mx-auto">
+
       <h1 className="text-2xl font-bold mb-4">Resultados de búsqueda</h1>
       <button
         onClick={() => navigate(-1)}
@@ -100,39 +134,54 @@ export default function UsuarioResultado() {
       {error && <p className="text-red-600 mb-4">{error}</p>}
       {mensaje && <p className="text-blue-600 mb-4">{mensaje}</p>}
 
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {usuarios.map((user) => (
-          <div key={user.id} className="border rounded p-4 shadow flex items-center gap-4">
-            <Link to={`/usuario/${user.nick}`}>
-              <img
-                src={user.avatar || "https://i.pravatar.cc/150"}
-                alt="Avatar"
-                className="w-20 h-20 object-cover rounded-full border cursor-pointer"
-              />
-            </Link>
-            <div className="flex-1">
-              <p className="text-lg font-semibold">{user.nick}</p>
-              <p className="text-sm text-gray-500">{user.email}</p>
+          <div
+  key={user.id}
+  className="bg-slate-100 border border-gray-300 rounded-xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-lg transition hover:scale-[1.01]"
+>
+  <Link to={`/usuario/${user.nick}`}>
+    <img
+      src={user.avatar || "https://i.pravatar.cc/150"}
+      alt="Avatar"
+      className="w-24 h-24 object-cover rounded-full border-4 border-white shadow-sm hover:ring hover:ring-blue-400 transition"
+    />
+  </Link>
 
-              {relaciones[user.id] === "aceptado" && (
-                <p className="text-green-600 mt-2">✔ Ya son amigos</p>
-              )}
-              {relaciones[user.id] === "pendiente" && (
-                <p className="text-yellow-500 mt-2">⏳ Solicitud pendiente</p>
-              )}
-              {relaciones[user.id] === "ninguno" && (
-                <button
-                  onClick={() => enviarSolicitudAmistad(user.id)}
-                  className="mt-2 bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
-                >
-                  Agregar amigo
-                </button>
-              )}
+  <h2 className="text-2xl font-bold text-gray-800 mt-4">{user.nick}</h2>
+  <p className="text-base text-gray-500 mb-2">{user.email}</p>
 
-            </div>
-          </div>
+  <div className="flex flex-col items-center gap-1 text-base text-gray-700 mb-4">
+    <p className="flex items-center gap-2">
+      👥 <span className="font-semibold">Amigos:</span> {user.cantidadAmigos ?? "…"}
+    </p>
+    <p className="flex items-center gap-2">
+      🎬 <span className="font-semibold">Calificaciones:</span> {user.cantidadCalificaciones ?? "…"}
+    </p>
+  </div>
+
+  {relaciones[user.id] === "aceptado" && (
+    <p className="text-green-600 font-medium">✔ Ya son amigos</p>
+  )}
+
+  {relaciones[user.id] === "pendiente" && (
+    <p className="text-yellow-500 font-medium">⏳ Solicitud pendiente</p>
+  )}
+
+  {relaciones[user.id] === "ninguno" && (
+    <button
+      onClick={() => enviarSolicitudAmistad(user.id)}
+      className="mt-2 bg-blue-500 hover:bg-blue-400 text-white px-5 py-2 rounded text-base font-semibold transition"
+    >
+      ➕ Agregar amigo
+    </button>
+  )}
+</div>
+
         ))}
       </div>
+
+
     </div>
   );
 }

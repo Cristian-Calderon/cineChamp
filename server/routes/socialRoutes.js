@@ -9,6 +9,8 @@ router.post('/solicitud/:id/aceptar', amigosController.aceptarSolicitud);
 router.post('/solicitud/:id/rechazar', amigosController.rechazarSolicitud);
 router.get('/lista/:id', amigosController.obtenerAmigos);
 router.get('/estado', amigosController.estadoRelacion);
+router.get('/contador/:id', amigosController.contarAmigos);
+
 
 router.post('/eliminar', amigosController.eliminarAmistad);
 
