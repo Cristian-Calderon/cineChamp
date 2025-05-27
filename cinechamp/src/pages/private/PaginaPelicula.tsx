@@ -98,7 +98,6 @@ export default function PaginaPelicula() {
       })
       .catch(console.error);
 
-    // Chequear si ya está en historial
     fetch(`http://localhost:3001/api/contenido/historial/${userId}`)
       .then((res) => res.json())
       .then((historial) => {
@@ -145,7 +144,6 @@ export default function PaginaPelicula() {
     const tipoContenido = tipo === "movie" ? "pelicula" : "serie";
 
     try {
-      // 1. Agregar a historial
       await fetch("http://localhost:3001/contenido/agregar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -156,7 +154,6 @@ export default function PaginaPelicula() {
         }),
       });
 
-      // 2. Agregar puntuación
       await fetch("http://localhost:3001/contenido/calificar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -181,15 +178,40 @@ export default function PaginaPelicula() {
     }
   };
 
-  if (!pelicula) return <p className="p-6">Cargando contenido...</p>;
+  const toggleTemporadaVista = async (idTemporada: number) => {
+    const yaVista = vistas[idTemporada];
 
-  function toggleTemporadaVista(idTemporada: number): void {
-    throw new Error("Function not implemented.");
-  }
+    try {
+      const method = yaVista ? "DELETE" : "POST";
+
+      await fetch("http://localhost:3001/contenido/temporada/vista", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id_usuario: userId,
+          id_contenido: parseInt(id!),
+          id_temporada: idTemporada,
+        }),
+      });
+
+      setVistas((prev) => ({
+        ...prev,
+        [idTemporada]: !yaVista,
+      }));
+
+      toast.success(
+        yaVista ? "Temporada desmarcada como vista" : "Temporada marcada como vista"
+      );
+    } catch (err) {
+      console.error("Error al marcar temporada como vista:", err);
+      toast.error("Error al actualizar temporada vista");
+    }
+  };
+
+  if (!pelicula) return <p className="p-6">Cargando contenido...</p>;
 
   return (
     <div className="bg-white text-black">
-      {/* Cabecera */}
       {pelicula.posterUrl && (
         <div
           className="relative min-h-[40vh] flex items-center justify-center px-6 py-12"
@@ -248,7 +270,6 @@ export default function PaginaPelicula() {
         </div>
       )}
 
-      {/* Contenido inferior */}
       <div className="w-full bg-gray-300 py-12">
         <div className="max-w-6xl mx-auto px-6">
           <div className="mb-8 flex justify-start">

@@ -141,11 +141,12 @@ export default function UsuarioResultado() {
   className="bg-slate-100 border border-gray-300 rounded-xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-lg transition hover:scale-[1.01]"
 >
   <Link to={`/usuario/${user.nick}`}>
-    <img
-      src={user.avatar || "https://i.pravatar.cc/150"}
-      alt="Avatar"
-      className="w-24 h-24 object-cover rounded-full border-4 border-white shadow-sm hover:ring hover:ring-blue-400 transition"
-    />
+  <img
+  src={user.avatar ? `${apiBase}${user.avatar}` : "https://i.pravatar.cc/150"}
+  alt="Avatar"
+  className="w-24 h-24 object-cover rounded-full border-4 border-white shadow-sm hover:ring hover:ring-blue-400 transition"
+/>
+
   </Link>
 
   <h2 className="text-2xl font-bold text-gray-800 mt-4">{user.nick}</h2>

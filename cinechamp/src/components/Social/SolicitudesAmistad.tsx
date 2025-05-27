@@ -1,5 +1,7 @@
-// components/SolicitudesAmistad.tsx
 import { UserPlus } from "lucide-react";
+
+// URL base para avatares
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 interface Solicitud {
   id: string;
@@ -12,7 +14,7 @@ interface Props {
   aceptarSolicitud: (id: string) => void;
 }
 
-export default function SolicitudesAmistad({ solicitudes, aceptarSolicitud }: Props) {
+export default function SolicitudesAmistad({ solicitudes = [], aceptarSolicitud }: Props) {
   return (
     <div className="rounded-xl border bg-white p-4 shadow-md">
       <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
@@ -26,7 +28,11 @@ export default function SolicitudesAmistad({ solicitudes, aceptarSolicitud }: Pr
           {solicitudes.map((s) => (
             <div key={`amigo-${s.id}`} className="flex items-center gap-3">
               <img
-                src={s.avatar || "https://i.pravatar.cc/150"}
+                src={
+                  s.avatar
+                    ? `${BACKEND_URL}${s.avatar}`
+                    : "https://i.pravatar.cc/150"
+                }
                 alt={s.nick}
                 className="w-9 h-9 rounded-full object-cover border"
               />

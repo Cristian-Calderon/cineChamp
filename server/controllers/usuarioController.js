@@ -9,8 +9,8 @@ const { asignarLogro } = require('./logrosController'); // ajusta ruta si está 
 
 async function registrar(req, res) {
   try {
-    const { nick, email, contraseña } = req.body;
-    const hashed = await bcrypt.hash(contraseña, 10);
+    const { nick, email, contrasena } = req.body;
+    const hashed = await bcrypt.hash(contrasena, 10);
 
     // Si hay imagen, guarda la ruta; si no, deja null o string vacío
     const avatar = req.file ? "/uploads/" + req.file.filename : null;
@@ -27,17 +27,20 @@ async function registrar(req, res) {
 
 async function login(req, res) {
   try {
-    const { email, contraseña } = req.body;
+    const { email, contrasena } = req.body;
     const user = await Usuario.obtenerUsuarioPorEmail(email);
-    if (!user || !(await bcrypt.compare(contraseña, user.contraseña))) {
+
+    // si no hay usuario o no hay hash, o la comparación falla:
+    if (!user || !user.hash || !(await bcrypt.compare(contrasena, user.hash))) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
+
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
-    // Enviamos el toker y enviamos el id
+
     res.json({
       token,
       nick: user.nick,
@@ -45,9 +48,11 @@ async function login(req, res) {
       avatar: user.avatar || null,
     });
   } catch (error) {
+    console.error('Error en login:', error);
     res.status(500).json({ error: error.message });
   }
 }
+
 
 async function actualizarUsuario(req, res) {
   try {

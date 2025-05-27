@@ -2,31 +2,25 @@
 const express = require('express');
 const router = express.Router();
 const UsuarioController = require('../controllers/usuarioController');
-const { obtenerCalificacionesDelUsuario } = require('../controllers/contenidoController');
 const upload = require("../utils/multerConfig");
 
-const { contarCalificaciones } = require('../controllers/usuarioController');
-
-
-router.post("/registro", upload.single("avatar"), UsuarioController.registrar);
-router.put("/:id", upload.single("avatar"), UsuarioController.actualizarUsuario);
 
 
 
-// Registro y login
-router.post('/register', UsuarioController.registrar);
+router.post('/registro', upload.single('avatar'), UsuarioController.registrar);
+router.post('/register', upload.single('avatar'), UsuarioController.registrar);
 router.post('/login', UsuarioController.login);
 
 // CRUD de usuarios
-
 router.get('/nick/:nick', UsuarioController.obtenerUsuarioPorNick);
-
-router.put('/:id', UsuarioController.actualizarUsuario);
-router.get("/buscar", UsuarioController.buscarUsuariosPorNick);
+router.get('/buscar', UsuarioController.buscarUsuariosPorNick);
 router.get('/:id', UsuarioController.obtenerUsuarioPorId);
 
-router.get('/contador-calificaciones/:id', contarCalificaciones);
+// Actualización (con avatar opcional)
+router.put('/:id', upload.single('avatar'), UsuarioController.actualizarUsuario);
 
-router.get('/usuarios/:id_usuario/calificaciones', obtenerCalificacionesDelUsuario);
+// Contadores y calificaciones
+router.get('/contador-calificaciones/:id', UsuarioController.contarCalificaciones);
+router.get('/usuarios/:id_usuario/calificaciones', require('../controllers/contenidoController').obtenerCalificacionesDelUsuario);
 
 module.exports = router;

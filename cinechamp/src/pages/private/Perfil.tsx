@@ -63,6 +63,7 @@ type Calificacion = {
 };
 
 export default function Perfil({ onLogout }: PerfilProps) {
+  const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
   const { nick } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -102,7 +103,11 @@ export default function Perfil({ onLogout }: PerfilProps) {
         setUserId(user.id);
         setProfile({
           name: user.nick,
-          photoUrl: user.avatar || "",
+          // Si recibes algo como "/uploads/miarchivo.jpg",
+          // anteponemos el host de la API para que el <img> funcione:
+          photoUrl: user.avatar
+            ? `http://localhost:3001${user.avatar}`
+            : "",
         });
       })
       .catch((err) => {
@@ -146,9 +151,15 @@ export default function Perfil({ onLogout }: PerfilProps) {
       .then(setSolicitudes)
       .catch(console.error);
 
-    fetch(`http://localhost:3001/api/amigos/lista/${userId}`)
-      .then((res) => res.json())
-      .then(setAmigos)
+    fetch(`${BACKEND_URL}/api/amigos/lista/${userId}`)
+      .then(res => res.json())
+      .then((data: Amigo[]) => {
+        const amigosConUrl = data.map(a => ({
+          ...a,
+          avatar: a.avatar ? `${BACKEND_URL}${a.avatar}` : '',
+        }));
+        setAmigos(amigosConUrl);
+      })
       .catch(console.error);
   }, [userId]);
 
@@ -177,17 +188,38 @@ export default function Perfil({ onLogout }: PerfilProps) {
     cargarLogros();
   }, [nick, userId, location.search]);
 
-  const aceptarSolicitud = async (amigoId: number) => {
-    const res = await fetch(`http://localhost:3001/api/amigos/solicitud/${amigoId}/aceptar`, {
-      method: "POST",
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setSolicitudes((prev) => prev.filter((s) => s.id !== amigoId));
-    } else {
-      alert("❌ Error al aceptar: " + data.error);
+// Dentro de Perfil.tsx
+
+const aceptarSolicitud = async (amigoId: number) => {
+  const res = await fetch(`${BACKEND_URL}/api/amigos/solicitud/${amigoId}/aceptar`, {
+    method: "POST",
+  });
+  const data = await res.json();
+
+  if (res.ok) {
+    // 1️⃣ Filtramos la solicitud
+    setSolicitudes((prev) => prev.filter((s) => s.id !== amigoId));
+
+    // 2️⃣ Buscamos los datos de la solicitud en el state antiguo
+    const solicitudAceptada = solicitudes.find((s) => s.id === amigoId);
+    if (solicitudAceptada) {
+      // 3️⃣ Montamos el objeto Amigo
+      const nuevoAmigo: Amigo = {
+        id: Number(solicitudAceptada.id),
+        nick: solicitudAceptada.nick,
+        // cuidamos la URL absoluta
+        avatar: solicitudAceptada.avatar
+          ? `${BACKEND_URL}${solicitudAceptada.avatar}`
+          : "",
+      };
+      // 4️⃣ Lo añadimos al array de amigos
+      setAmigos((prev) => [...prev, nuevoAmigo]);
     }
-  };
+  } else {
+    alert("❌ Error al aceptar: " + data.error);
+  }
+};
+
 
   const handleLogout = () => {
     localStorage.removeItem("token");

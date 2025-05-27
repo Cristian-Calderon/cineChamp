@@ -9,13 +9,20 @@ const crearUsuario = async (nick, email, contraseña, avatar) => {
   return result.insertId;
 };
 
-const obtenerUsuarioPorEmail = async (email) => {
+async function obtenerUsuarioPorEmail(email) {
   const [rows] = await db.query(
-    'SELECT * FROM usuario WHERE email = ?',
+    `SELECT
+       id,
+       nick,
+       email,
+       contraseña   AS hash,
+       avatar
+     FROM usuario
+     WHERE email = ?`,
     [email]
   );
-  return rows[0];
-};
+  return rows[0];  // ahora rows[0].hash contiene el hash de la contraseña
+}
 
 const obtenerUsuarioPorId = async (id) => {
   const [rows] = await db.query(

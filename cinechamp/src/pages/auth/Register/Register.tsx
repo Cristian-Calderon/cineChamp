@@ -1,35 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from 'react-router-dom';
 
 function Register() {
   const [nick, setNick] = useState('');
   const [email, setEmail] = useState('');
-  const [contraseña, setContraseña] = useState('');
-  const [avatar, setAvatar] = useState('');
+  const [contrasena, setContrasena] = useState('');
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // 👈
+  const navigate = useNavigate();
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setAvatarFile(e.target.files[0]);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('nick', nick);
+    formData.append('email', email);
+    formData.append('contrasena', contrasena);
+    if (avatarFile) formData.append('avatar', avatarFile);
+
     try {
-      const response = await axios.post('http://localhost:3001/api/usuarios/register', {
-        nick,
-        email,
-        contraseña,
-        avatar
-      });
+      await axios.post('http://localhost:3001/api/usuarios/register', formData);
 
       setMensaje('✅ Usuario creado correctamente. Redirigiendo al login...');
       setError('');
 
-      // 👇 Redirige al login automáticamente
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
+      setTimeout(() => navigate('/login'), 1500);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al registrarse');
+      console.error('Error en registro:', err.response || err);
+      const serverError = err.response?.data?.error;
+      setError(serverError || 'Error al registrarse');
       setMensaje('');
     }
   };
@@ -39,70 +46,58 @@ function Register() {
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold text-center mb-6">Registro</h2>
 
-        {mensaje && (
-          <p className="text-green-500 text-sm mb-4 text-center">
-            {mensaje}
-          </p>
-        )}
-        {error && (
-          <p className="text-red-500 text-sm mb-4 text-center">
-            {error}
-          </p>
-        )}
+        {mensaje && <p className="text-green-500 text-sm mb-4 text-center">{mensaje}</p>}
+        {error   && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
           <div className="mb-4">
-            <label htmlFor="nick" className="block text-gray-700 mb-1">
-              Nick:
-            </label>
+            <label htmlFor="nick" className="block text-gray-700 mb-1">Nick:</label>
             <input
               id="nick"
+              name="nick"
               type="text"
-              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={nick}
               onChange={(e) => setNick(e.target.value)}
               required
+              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 mb-1">
-              Email:
-            </label>
+            <label htmlFor="email" className="block text-gray-700 mb-1">Email:</label>
             <input
               id="email"
+              name="email"
               type="email"
-              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="contraseña" className="block text-gray-700 mb-1">
-              Contraseña:
-            </label>
+            <label htmlFor="contrasena" className="block text-gray-700 mb-1">Contraseña:</label>
             <input
-              id="contraseña"
+              id="contrasena"
+              name="contrasena"
               type="password"
-              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={contraseña}
-              onChange={(e) => setContraseña(e.target.value)}
+              value={contrasena}
+              onChange={(e) => setContrasena(e.target.value)}
               required
+              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div className="mb-6">
-            <label htmlFor="avatar" className="block text-gray-700 mb-1">
-              Avatar (opcional):
-            </label>
+            <label htmlFor="avatar" className="block text-gray-700 mb-1">Avatar (opcional):</label>
             <input
               id="avatar"
-              type="text"
-              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={avatar}
-              onChange={(e) => setAvatar(e.target.value)}
+              name="avatar"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full"
             />
           </div>
 
@@ -116,9 +111,7 @@ function Register() {
 
         <p className="text-center text-sm text-gray-600 mt-6">
           ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="text-blue-500 hover:underline">
-            Inicia Sesión
-          </Link>
+          <Link to="/login" className="text-blue-500 hover:underline">Inicia Sesión</Link>
         </p>
       </div>
     </div>
