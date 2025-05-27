@@ -60,7 +60,6 @@ export default function PerfilPublico() {
         let estado = data.estado;
         if (estado === "aceptado") estado = "amigos";
         if (estado === null) estado = "ninguna";
-        console.log("🔍 Estado de relación (normalizado):", estado);
         setEstadoRelacion(estado);
       })
       .catch(console.error);
@@ -119,6 +118,13 @@ export default function PerfilPublico() {
     setEstadoRelacion("ninguna");
   };
 
+  // 👇 Esta función navega con editable: false
+  const handleClickContenido = (item: any) => {
+    navigate(`/contenido/${item.media_type}/${item.id}`, {
+      state: { editable: false },
+    });
+  };
+
   return (
     <div className="p-6 w-full">
       <div className="w-full bg-stone-500 border rounded-xl p-4 shadow-md mb-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
@@ -138,7 +144,7 @@ export default function PerfilPublico() {
         <PerfilHeader
           photoUrl={profile.photoUrl}
           name={profile.name}
-          estadoRelacion={estadoRelacion}
+          estadoRelacion={estadoRelacion === null ? undefined : estadoRelacion}
           onAgregarAmigo={enviarSolicitudAmistad}
           onEliminarAmigo={eliminarAmistad}
         />
@@ -153,22 +159,33 @@ export default function PerfilPublico() {
           <Carrusel
             titulo="🎬 Historial - Películas"
             items={historial.filter((h: any) => h.media_type === "movie").slice(0, 10)}
+            total={historial.filter((h: any) => h.media_type === "movie").length}
             onVerMas={() => navigate(`/usuario/${nick}/lista/historial/movie`)}
+            onClickItem={handleClickContenido}
           />
+
           <Carrusel
             titulo="📺 Historial - Series"
             items={historial.filter((h: any) => h.media_type === "tv").slice(0, 10)}
+            total={historial.filter((h: any) => h.media_type === "tv").length}
             onVerMas={() => navigate(`/usuario/${nick}/lista/historial/tv`)}
+            onClickItem={handleClickContenido}
           />
+
           <Carrusel
             titulo="🎬 Tus Películas Favoritas"
             items={favorites.filter((f: any) => f.media_type === "movie").slice(0, 10)}
+            total={favorites.filter((f: any) => f.media_type === "movie").length}
             onVerMas={() => navigate(`/usuario/${nick}/lista/favoritos/movie`)}
+            onClickItem={handleClickContenido}
           />
+
           <Carrusel
             titulo="📺 Tus Series Favoritas"
             items={favorites.filter((f: any) => f.media_type === "tv").slice(0, 10)}
+            total={favorites.filter((f: any) => f.media_type === "tv").length}
             onVerMas={() => navigate(`/usuario/${nick}/lista/favoritos/tv`)}
+            onClickItem={handleClickContenido}
           />
         </div>
 

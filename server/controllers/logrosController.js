@@ -1,4 +1,4 @@
-const db = require('../models/db'); // Asegúrate de que la ruta sea correcta
+const db = require('../models/db'); 
 
 const obtenerLogrosPorUsuario = async (req, res) => {
   const { username } = req.params;

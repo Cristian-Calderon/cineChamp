@@ -94,3 +94,20 @@ fecha_creación
 fecha_actualización
 parent_post_id
 
+
+// añadido 26 de mayo :
+1. Asegúrate de tener las siguientes tablas
+temporadas (relacionadas con una serie/id_api)
+sql
+Copiar
+Editar
+
+
+CREATE TABLE temporadas_vistas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_usuario INT NOT NULL,
+  id_serie INT NOT NULL,
+  id_temporada INT NOT NULL,
+  fecha_marcado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_temporada_vista (id_usuario, id_serie, id_temporada)
+);

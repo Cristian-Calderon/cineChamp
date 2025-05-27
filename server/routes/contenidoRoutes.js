@@ -13,7 +13,12 @@ const {
   obtenerCalificacionesDelUsuario,
   obtenerDetallesCompletos,
   obtenerResenasPorContenido,
-  eliminarContenidoController
+  eliminarContenidoController,
+  marcarTemporadaVista,
+  desmarcarTemporadaVista,
+  obtenerDatosSeries,
+  obtenerTemporadasVistas,
+  eliminarFavoritoController
 } = require('../controllers/contenidoController');
 
 
@@ -31,6 +36,8 @@ router.get('/buscar', buscarAPI);
 // Agregar y marcar como favorito
 router.post('/agregar', agregarContenidoController);
 router.post('/favorito', favoritoContenidoController);
+router.delete('/favorito', eliminarFavoritoController);
+
 router.get('/favoritos/:id_usuario', obtenerFavoritosPorUsuario);
 router.get('/historial/:id_usuario', obtenerHistorialPorUsuario);
 
@@ -41,6 +48,14 @@ router.get('/usuarios/:id_usuario/calificaciones', obtenerCalificacionesDelUsuar
 
 
 router.get("/detalles/:tipo/:id", obtenerDetallesCompletos);
+
+router.get('/series/:id_api/tmdb/estructura-simple', obtenerDatosSeries);
+router.post("/temporada/vista", marcarTemporadaVista);
+router.delete("/temporada/vista", desmarcarTemporadaVista);
+router.get('/temporadas-vistas/:id_usuario/:id_serie', obtenerTemporadasVistas);
+
+
+
 router.get("/comentarios/:id_api", obtenerResenasPorContenido);
 
 router.delete("/eliminar", eliminarContenidoController);

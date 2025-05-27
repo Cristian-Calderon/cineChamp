@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import ModalPuntuacion from "../../components/Modal/ModalPuntuacion";
-import fondoContenido from "../../assets/imagenes/cinema.jpg"; // Fondo importado
+import fondoContenido from "../../assets/imagenes/cinema.jpg";
+import { toast } from "react-toastify";
 
 type Resultado = {
   id: number;
   title?: string;
   name?: string;
-  media_type: string;
+  media_type: "movie" | "tv";
   poster_path?: string | null;
 };
 
@@ -23,7 +24,6 @@ export default function Buscador() {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalItem, setModalItem] = useState<Resultado | null>(null);
-  const [tipoGuardadoModal, setTipoGuardadoModal] = useState<"favorito" | "historial" | null>(null);
   const [puntuacionInput, setPuntuacionInput] = useState("");
   const [comentarioInput, setComentarioInput] = useState("");
 
@@ -39,7 +39,9 @@ export default function Buscador() {
     try {
       const res = await fetch(`http://localhost:3001/contenido/bContenido?q=${encodeURIComponent(busqueda)}`);
       const data = await res.json();
-      const filtrados = data.filter((item: Resultado) => item.media_type === "movie" || item.media_type === "tv");
+      const filtrados = data.filter((item: Resultado) =>
+        item.media_type === "movie" || item.media_type === "tv"
+      );
       setResultados(filtrados);
     } catch (error) {
       console.error("❌ Error al buscar:", error);
@@ -48,58 +50,62 @@ export default function Buscador() {
     }
   };
 
-  const manejarAgregar = (item: Resultado, tipo: "favorito" | "historial") => {
+  const manejarAgregar = (item: Resultado) => {
     setModalItem(item);
-    setTipoGuardadoModal(tipo);
     setModalVisible(true);
   };
 
   const guardarContenido = async () => {
     const puntuacion = parseInt(puntuacionInput, 10);
     if (!puntuacion || puntuacion < 1 || puntuacion > 10) {
-      alert("❌ Puntuación inválida.");
+      toast.error("❌ Puntuación inválida (1-10)");
       return;
     }
 
-    if (!modalItem || !tipoGuardadoModal) return;
+    if (!modalItem) return;
 
     try {
+      const tipoGuardado = "historial";
+      const tipoContenido = modalItem.media_type === "movie" ? "pelicula" : "serie";
+
+      // Agregar al historial
       const res = await fetch("http://localhost:3001/contenido/agregar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id_usuario: userId,
           id_api: modalItem.id,
-          tipoGuardado: tipoGuardadoModal,
+          tipoGuardado,
         }),
       });
 
       const result = await res.json();
       if (!res.ok) {
-        alert("❌ Error: " + result.error);
+        toast.error("❌ " + result.error || "Error al guardar");
         return;
       }
 
+      // Calificar
       await fetch("http://localhost:3001/contenido/calificar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id_usuario: userId,
           id_api: modalItem.id,
-          tipo: modalItem.media_type === "movie" ? "pelicula" : "serie",
+          tipo: tipoContenido,
           puntuacion,
           comentario: comentarioInput,
-          tipoGuardado: tipoGuardadoModal,
+          tipoGuardado,
         }),
       });
 
-      alert("✅ Guardado correctamente");
+      toast.success("✅ Añadido al historial");
     } catch (err) {
       console.error("❌ Error de red:", err);
+      toast.error("❌ Error de red al guardar");
     } finally {
       setModalVisible(false);
       setModalItem(null);
-      setTipoGuardadoModal(null);
       setPuntuacionInput("");
       setComentarioInput("");
     }
@@ -108,7 +114,7 @@ export default function Buscador() {
   const renderTarjeta = (item: Resultado) => (
     <div
       key={item.id}
-      className="relative border rounded-xl shadow hover:shadow-lg transition p-2 bg-cyan-800 text-white"
+      className="relative border rounded-xl shadow hover:shadow-lg transition p-2 bg-white text-black"
     >
       {item.poster_path ? (
         <img
@@ -124,25 +130,24 @@ export default function Buscador() {
 
       <div className="flex justify-around mt-1">
         <button
-          onClick={() => manejarAgregar(item, "favorito")}
-          title="Agregar a favoritos"
-          className="bg-white/80 hover:bg-white text-red-500 p-2 rounded-full shadow transition hover:scale-105"
-        >❤️</button>
-        <button
-          onClick={() => manejarAgregar(item, "historial")}
+          onClick={() => manejarAgregar(item)}
           title="Agregar a historial"
-          className="bg-white/80 hover:bg-white text-blue-500 p-2 rounded-full shadow transition hover:scale-105"
-        >📜</button>
+          className="bg-blue-100 hover:bg-blue-200 text-blue-600 p-2 rounded-full shadow transition hover:scale-105"
+        >
+          🎬
+        </button>
         <button
           onClick={() => navigate(`/contenido/${item.media_type}/${item.id}`)}
           title="Ver detalles"
-          className="bg-white/80 hover:bg-white text-gray-700 p-2 rounded-full shadow transition hover:scale-105"
-        >▶️</button>
+          className="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-full shadow transition hover:scale-105"
+        >
+          ℹ️
+        </button>
       </div>
 
       <div className="mt-3 text-center">
         <p className="text-sm font-semibold truncate">{item.title || item.name}</p>
-        <p className="text-lg text-black">
+        <p className="text-lg text-gray-600">
           {item.media_type === "movie" ? "Película" : "Serie"}
         </p>
       </div>
@@ -166,19 +171,7 @@ export default function Buscador() {
             onClick={() => navigate(`/perfil/${nick}`)}
             className="mb-4 flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md transition-transform hover:scale-105"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M7.707 14.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L4.414 9H16a1 1 0 110 2H4.414l3.293 3.293a1 1 0 01-1.414 1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Volver al perfil
+            ⬅️ Volver al perfil
           </button>
         )}
 
@@ -194,18 +187,17 @@ export default function Buscador() {
           </div>
         )}
 
-        {modalVisible && modalItem && tipoGuardadoModal && (
+        {modalVisible && modalItem && (
           <ModalPuntuacion
             isOpen={modalVisible}
             onClose={() => {
               setModalVisible(false);
               setModalItem(null);
-              setTipoGuardadoModal(null);
               setPuntuacionInput("");
               setComentarioInput("");
             }}
             item={modalItem}
-            tipo={tipoGuardadoModal}
+            tipo="historial"
             onSubmit={guardarContenido}
             puntuacion={puntuacionInput}
             setPuntuacion={setPuntuacionInput}

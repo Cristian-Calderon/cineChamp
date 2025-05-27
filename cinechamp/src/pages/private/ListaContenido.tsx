@@ -154,11 +154,11 @@ export default function ListaContenido() {
               setFiltro(e.target.value);
               setPaginaActual(1);
             }}
-            className="w-full sm:w-72 border border-gray-300 rounded px-4 py-2 text-black"
+            className="w-full sm:w-72 border border-gray-300 rounded px-4 py-2 text-black "
           />
         </div>
 
-        <h1 className="text-3xl font-bold mb-4">
+        <h1 className="text-3xl font-bold mb-4 ">
           {section === "favoritos"
             ? `🎉 Favoritos – ${media_type === "movie" ? "Películas" : "Series"}`
             : `🕘 Historial – ${media_type === "movie" ? "Películas" : "Series"}`}
@@ -168,24 +168,24 @@ export default function ListaContenido() {
           <p className="text-gray-300">No hay contenido para mostrar.</p>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 ">
               {elementosPagina.map((item) => (
                 <div
                   key={item.id}
-                  className="relative border rounded-xl shadow hover:shadow-lg transition p-2 bg-white text-black"
+                  className="relative border rounded-xl shadow hover:shadow-lg transition p-2 bg-white text-black "
                 >
                   {item.posterUrl ? (
                     <img
                       src={item.posterUrl}
                       alt={item.title}
-                      className="w-full h-[200px] object-cover rounded-xl"
+                      className="w-full h-[300px] object-cover rounded-xl"
                       onClick={() =>
                         navigate(`/contenido/${item.media_type}/${item.id}`)
                       }
                       style={{ cursor: "pointer" }}
                     />
                   ) : (
-                    <div className="w-full h-[200px] bg-gray-200 rounded-xl flex items-center justify-center">
+                    <div className="w-full h-[300px] bg-gray-200 rounded-xl flex items-center justify-center ">
                       <span className="text-sm text-gray-600">Sin imagen</span>
                     </div>
                   )}
@@ -212,8 +212,8 @@ export default function ListaContenido() {
                   </div>
 
                   <div className="mt-3 text-center">
-                    <p className="text-sm font-semibold truncate">{item.title}</p>
-                    <p className="text-xs text-blue-600">
+                    <p className="text-lg font-semibold truncate">{item.title}</p>
+                    <p className="text-base text-blue-600">
                       {item.media_type === "movie" ? "Película" : "Serie"}
                     </p>
                   </div>
