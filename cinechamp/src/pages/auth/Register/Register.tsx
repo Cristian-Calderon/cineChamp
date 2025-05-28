@@ -1,6 +1,10 @@
 import React, { useState, ChangeEvent } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import logo from '../../../assets/imagen-header-logo/logo2.jpeg'; 
+import fondoRegistro from '../../../assets/imagenes/prueb.jpeg'; 
+
+
 
 function Register() {
   const [nick, setNick] = useState('');
@@ -42,10 +46,17 @@ function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center mb-6">Registro</h2>
+    <div
+  className="min-h-screen flex items-center justify-center bg-cover bg-center"
+  style={{ backgroundImage: `url(${fondoRegistro})` }}
+>
+  <div className="w-full max-w-md bg-white/90 p-8 rounded-lg shadow-xl backdrop-blur-md">
+   
+    <div className="flex justify-center mb-2">
+      <img src={logo} alt="Logo" className="h-24" />
+    </div>
 
+    <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Registro</h2>
         {mensaje && <p className="text-green-500 text-sm mb-4 text-center">{mensaje}</p>}
         {error   && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
 
