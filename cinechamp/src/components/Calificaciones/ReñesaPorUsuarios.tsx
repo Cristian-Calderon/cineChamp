@@ -26,7 +26,8 @@ export default function ResenasDeUsuarios({ id_api, tipo }: Props) {
 
   const propiaResena = resenas.find((r) => r.nick === userNick);
 
-  useEffect(() => {
+  // 🔁 Nueva función para recargar reseñas
+  const cargarReseñas = () => {
     fetch(`http://localhost:3001/api/contenido/comentarios/${id_api}`)
       .then((res) => res.json())
       .then((data) => {
@@ -40,6 +41,10 @@ export default function ResenasDeUsuarios({ id_api, tipo }: Props) {
         }
       })
       .catch((err) => console.error("❌ Error al cargar reseñas:", err));
+  };
+
+  useEffect(() => {
+    cargarReseñas();
   }, [id_api, userNick]);
 
   const handleGuardarComentario = async () => {
@@ -65,22 +70,9 @@ export default function ResenasDeUsuarios({ id_api, tipo }: Props) {
         return;
       }
 
-      const nuevaResena = {
-        nick: userNick!,
-        puntuacion: puntuacionEditada,
-        comentario: comentarioEditado,
-        avatar: userAvatar,
-      };
-
-      setResenas((prev) => {
-        const existe = prev.find((r) => r.nick === userNick);
-        return existe
-          ? prev.map((r) => (r.nick === userNick ? nuevaResena : r))
-          : [...prev, nuevaResena];
-      });
-
       setMensaje({ tipo: "ok", texto: "✅ Comentario guardado" });
       setEditando(false);
+      cargarReseñas(); // 🔄 Refrescar reseñas desde el backend
     } catch (error) {
       console.error("❌ Error al guardar reseña:", error);
       setMensaje({ tipo: "error", texto: "❌ Error al guardar reseña" });
@@ -109,7 +101,6 @@ export default function ResenasDeUsuarios({ id_api, tipo }: Props) {
         </div>
       )}
 
-      {/* Si no hay reseña propia y no está editando, mostrar botón */}
       {!propiaResena && !editando && (
         <button
           onClick={() => setEditando(true)}
@@ -119,7 +110,6 @@ export default function ResenasDeUsuarios({ id_api, tipo }: Props) {
         </button>
       )}
 
-      {/* Editor de comentario si está editando */}
       {editando && (
         <div className="bg-white rounded-xl p-4 shadow-md mb-6">
           <p className="font-semibold text-gray-800 mb-2">
@@ -154,7 +144,6 @@ export default function ResenasDeUsuarios({ id_api, tipo }: Props) {
         </div>
       )}
 
-      {/* Lista de reseñas */}
       <div className="space-y-6">
         {resenas.length === 0 ? (
           <p className="text-gray-400">No hay reseñas todavía.</p>

@@ -352,26 +352,30 @@ const obtenerResenasPorContenido = async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT c.puntuacion, c.comentario, u.nick, u.avatar
-        FROM calificacion c
-        JOIN usuario u ON c.id_usuario = u.id
-        WHERE c.id_api = ?`,
+       FROM calificacion c
+       JOIN usuario u ON c.id_usuario = u.id
+       WHERE c.id_api = ?`,
       [id_api]
     );
+
+    const baseUrl = process.env.BASE_URL || "http://localhost:3001";
+
+    const reseñasConUrl = rows.map(r => ({
+      ...r,
+      avatar: r.avatar ? `${baseUrl}${r.avatar}` : null
+    }));
 
     const media =
       rows.length > 0
         ? (rows.reduce((acc, r) => acc + r.puntuacion, 0) / rows.length).toFixed(1)
         : null;
 
-
-
-    res.json({ media, reseñas: rows });
+    res.json({ media, reseñas: reseñasConUrl });
   } catch (error) {
     console.error("❌ Error al obtener reseñas:", error);
     res.status(500).json({ error: "Error interno al obtener reseñas" });
   }
 };
-
 
 
 const eliminarContenidoController = async (req, res) => {
