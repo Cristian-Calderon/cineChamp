@@ -1,6 +1,8 @@
 const { buscarContenido } = require('../models/contenidoModel');
 const { obtenerDetallesPorId, buscarSeries } = require('../models/apiUsuarioModel');
 const { verificarLogros } = require('../logros');
+const { otorgarXP } = require('./nivelController');
+
 const db = require('../models/db');
 const fetch = require('node-fetch');
 require('dotenv').config();
@@ -33,7 +35,7 @@ const verificarConexionAPI = async (req, res) => {
 
 const buscarContenidoController = async (req, res) => {
   const query = req.query.q;
-
+  
   try {
     const peliculas = await buscarContenido(query);
     const series = await buscarSeries(query);
@@ -48,6 +50,8 @@ const buscarContenidoController = async (req, res) => {
 const agregarContenidoController = async (req, res) => {
   const { id_usuario, id_api } = req.body;
   console.log("📩 Datos recibidos en agregarContenidoController:", { id_usuario, id_api });
+
+  await otorgarXP(id_usuario, 'favorito');
 
   if (!id_usuario || !id_api) {
     return res.status(400).json({ error: 'Faltan datos' });
@@ -98,6 +102,8 @@ const agregarContenidoController = async (req, res) => {
 
 const favoritoContenidoController = async (req, res) => {
   const { id_usuario, id_tmdb } = req.body;
+  await otorgarXP(id_usuario, 'favorito');
+
   console.log("📩 Datos recibidos en favoritoContenidoController:", { id_usuario, id_tmdb });
 
   if (!id_usuario || !id_tmdb) {
@@ -219,6 +225,11 @@ const obtenerHistorialPorUsuario = async (req, res) => {
 
 const calificarContenido = async (req, res) => {
   const { id_usuario, id_api, tipo, puntuacion, comentario } = req.body;
+
+  if (comentario) {
+  await otorgarXP(id_usuario, 'comentario');
+}
+  
   
   if (!id_usuario || !id_api || !tipo || !puntuacion) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });

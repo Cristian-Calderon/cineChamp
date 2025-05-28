@@ -20,6 +20,7 @@ const {
   obtenerTemporadasVistas,
   eliminarFavoritoController
 } = require('../controllers/contenidoController');
+const { obtenerNivelUsuario } = require('../controllers/nivelController');
 
 
 
@@ -54,7 +55,7 @@ router.post("/temporada/vista", marcarTemporadaVista);
 router.delete("/temporada/vista", desmarcarTemporadaVista);
 router.get('/temporadas-vistas/:id_usuario/:id_serie', obtenerTemporadasVistas);
 
-
+router.get('/xp/:id_usuario', obtenerNivelUsuario);
 
 router.get("/comentarios/:id_api", obtenerResenasPorContenido);
 

@@ -111,3 +111,6 @@ CREATE TABLE temporadas_vistas (
   fecha_marcado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY unique_temporada_vista (id_usuario, id_serie, id_temporada)
 );
+
+//barra de nivel
+ALTER TABLE usuario ADD COLUMN experiencia INT DEFAULT 0;
