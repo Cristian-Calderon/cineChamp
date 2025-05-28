@@ -14,6 +14,7 @@
     "axios": "^1.8.4",
     "lucide-react": "^0.510.0",
     "react": "^18.3.1",
+    "react-circular-progressbar": "^2.2.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.4.1",
     "react-toastify": "^11.0.5"
@@ -23,6 +24,7 @@
     "@tailwindcss/postcss": "^4.1.4",
     "@types/axios": "^0.9.36",
     "@types/react": "^18.3.18",
+    "@types/react-circular-progressbar": "^1.0.2",
     "@types/react-dom": "^18.3.5",
     "@types/react-router-dom": "^5.3.3",
     "@types/react-toastify": "^4.0.2",

@@ -7,7 +7,7 @@ import AmigosComponentes from "../../components/Social/AmigosComponente";
 import UltimasCalificaciones from "../../components/Calificaciones/UltimasCalificaciones";
 import PerfilHeader from "../../components/PerfilHeader/PerfilHeader";
 import BuscadorUnificado from "../../components/BuscadorUnificado/BuscadorUnificado";
-import logo from "../../assets/imagen-header-logo/LogoCineChamp.png";
+import logo from "../../assets/imagen-header-logo/logo2.jpeg";
 
 // URL base de la API
 const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
@@ -194,7 +194,10 @@ export default function PerfilPublico() {
 
   return (
     <div className="p-6 w-full">
-      <div className="w-full bg-stone-500 border rounded-xl p-4 shadow-md mb-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
+      <div
+  className="w-full border rounded-xl p-4 shadow-md mb-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6"
+  style={{ backgroundColor: "#e6e6e6" }}
+>
         <img
           src={logo}
           alt="CineChamp Logo"
@@ -207,7 +210,10 @@ export default function PerfilPublico() {
           estadoRelacion={estadoRelacion || undefined}
           onAgregarAmigo={enviarSolicitudAmistad}
           onEliminarAmigo={eliminarAmistad}
+          id_usuario={userIdPerfil ?? 0}
+          
         />
+        
         <BuscadorUnificado
           onBuscarPeliculas={(q) => navigate(`/id/${nick}/buscador?q=${encodeURIComponent(q)}`)}
           onBuscarAmigo={(n) => navigate(`/usuario/resultado?nick=${encodeURIComponent(n)}`)}

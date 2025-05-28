@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import ModalPuntuacion from "../../components/Modal/ModalPuntuacion";
-import fondoContenido from "../../assets/imagenes/cinema.jpg";
+import fondoContenido from "../../assets/imagenes/logo2.jpeg";
 import { toast } from "react-toastify";
 
 type Resultado = {
@@ -123,7 +123,7 @@ export default function Buscador() {
           className="w-full h-[300px] object-cover rounded-xl"
         />
       ) : (
-        <div className="w-full h-[300px] bg-gray-200 rounded-xl flex items-center justify-center">
+        <div className="w-full h-[300px] bg-gray-400 rounded-xl flex items-center justify-center">
           <span className="text-sm text-gray-600">Sin imagen</span>
         </div>
       )}
@@ -145,7 +145,7 @@ export default function Buscador() {
         </button>
       </div>
 
-      <div className="mt-3 text-center">
+      <div className="mt-6 text-center">
         <p className="text-sm font-semibold truncate">{item.title || item.name}</p>
         <p className="text-lg text-gray-600">
           {item.media_type === "movie" ? "Película" : "Serie"}
@@ -165,14 +165,26 @@ export default function Buscador() {
         backgroundAttachment: "fixed",
       }}
     >
-      <div className="relative z-10 p-6 max-w-6xl mx-auto bg-black/40 backdrop-blur-sm rounded-lg">
+      <div className="relative z-10 min-h-screen p-6 max-w-6xl mx-auto bg-white/40 backdrop-blur-sm rounded-lg flex flex-col justify-start">
+
         {nick && (
           <button
-            onClick={() => navigate(`/perfil/${nick}`)}
-            className="mb-4 flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md transition-transform hover:scale-105"
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 font-semibold mb-6"
           >
-            ⬅️ Volver al perfil
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Volver
           </button>
+
         )}
 
         <h1 className="text-2xl font-bold mb-4">Resultados de búsqueda</h1>

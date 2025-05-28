@@ -8,7 +8,7 @@ import UltimasCalificaciones from "../../components/Calificaciones/UltimasCalifi
 import SolicitudesAmistad from "../../components/Social/SolicitudesAmistad";
 import PerfilHeader from "../../components/PerfilHeader/PerfilHeader";
 import BuscadorUnificado from "../../components/BuscadorUnificado/BuscadorUnificado";
-import logo from "../../assets/imagen-header-logo/LogoCineChamp.png";
+import logo from "../../assets/imagen-header-logo/logo2.jpeg";
 
 type Movie = {
   id: number;
@@ -20,6 +20,7 @@ type Movie = {
 type Profile = {
   name: string;
   photoUrl: string;
+  nivelUsuario?: number;
 };
 
 type Achievement = {
@@ -188,37 +189,37 @@ export default function Perfil({ onLogout }: PerfilProps) {
     cargarLogros();
   }, [nick, userId, location.search]);
 
-// Dentro de Perfil.tsx
+  // Dentro de Perfil.tsx
 
-const aceptarSolicitud = async (amigoId: number) => {
-  const res = await fetch(`${BACKEND_URL}/api/amigos/solicitud/${amigoId}/aceptar`, {
-    method: "POST",
-  });
-  const data = await res.json();
+  const aceptarSolicitud = async (amigoId: number) => {
+    const res = await fetch(`${BACKEND_URL}/api/amigos/solicitud/${amigoId}/aceptar`, {
+      method: "POST",
+    });
+    const data = await res.json();
 
-  if (res.ok) {
-    // 1️⃣ Filtramos la solicitud
-    setSolicitudes((prev) => prev.filter((s) => s.id !== amigoId));
+    if (res.ok) {
+      // 1️⃣ Filtramos la solicitud
+      setSolicitudes((prev) => prev.filter((s) => s.id !== amigoId));
 
-    // 2️⃣ Buscamos los datos de la solicitud en el state antiguo
-    const solicitudAceptada = solicitudes.find((s) => s.id === amigoId);
-    if (solicitudAceptada) {
-      // 3️⃣ Montamos el objeto Amigo
-      const nuevoAmigo: Amigo = {
-        id: Number(solicitudAceptada.id),
-        nick: solicitudAceptada.nick,
-        // cuidamos la URL absoluta
-        avatar: solicitudAceptada.avatar
-          ? `${BACKEND_URL}${solicitudAceptada.avatar}`
-          : "",
-      };
-      // 4️⃣ Lo añadimos al array de amigos
-      setAmigos((prev) => [...prev, nuevoAmigo]);
+      // 2️⃣ Buscamos los datos de la solicitud en el state antiguo
+      const solicitudAceptada = solicitudes.find((s) => s.id === amigoId);
+      if (solicitudAceptada) {
+        // 3️⃣ Montamos el objeto Amigo
+        const nuevoAmigo: Amigo = {
+          id: Number(solicitudAceptada.id),
+          nick: solicitudAceptada.nick,
+          // cuidamos la URL absoluta
+          avatar: solicitudAceptada.avatar
+            ? `${BACKEND_URL}${solicitudAceptada.avatar}`
+            : "",
+        };
+        // 4️⃣ Lo añadimos al array de amigos
+        setAmigos((prev) => [...prev, nuevoAmigo]);
+      }
+    } else {
+      alert("❌ Error al aceptar: " + data.error);
     }
-  } else {
-    alert("❌ Error al aceptar: " + data.error);
-  }
-};
+  };
 
 
   const handleLogout = () => {
@@ -235,7 +236,10 @@ const aceptarSolicitud = async (amigoId: number) => {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-neutral-400 via-slate-50 to-black text-black p-6">
-      <div className="w-full bg-slate-400 border rounded-xl p-4 shadow-md mb-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
+      <div
+        className="w-full border rounded-xl p-4 shadow-md mb-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6"
+        style={{ backgroundColor: "#e6e6e6" }}
+      >
         <img
           src={logo}
           alt="CineChamp Logo"
@@ -251,12 +255,14 @@ const aceptarSolicitud = async (amigoId: number) => {
         />
 
         <PerfilHeader
+
+          id_usuario={userId ?? 0} // ← usa el verdadero userId
           photoUrl={profile.photoUrl}
           name={profile.name}
+          peliculasVistas={37}
           onEditProfile={() => navigate("/editar-perfil")}
           onLogout={handleLogout}
         />
-
         <BuscadorUnificado
           onBuscarPeliculas={(query) => navigate(`/id/${nick}/buscador?q=${encodeURIComponent(query)}`)}
           onBuscarAmigo={(nickAmigo) => navigate(`/usuario/resultado?nick=${encodeURIComponent(nickAmigo)}`)}
