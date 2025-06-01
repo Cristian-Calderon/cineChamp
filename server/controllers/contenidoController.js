@@ -48,23 +48,16 @@ const buscarContenidoController = async (req, res) => {
 };
 
 const agregarContenidoController = async (req, res) => {
-  const { id_usuario, id_api } = req.body;
-  console.log("📩 Datos recibidos en agregarContenidoController:", { id_usuario, id_api });
+  const { id_usuario, id_api, tipo } = req.body;
+  console.log("📩 Datos recibidos en agregarContenidoController:", { id_usuario, id_api, tipo });
 
-  await otorgarXP(id_usuario, 'favorito');
-
-  if (!id_usuario || !id_api) {
+  if (!id_usuario || !id_api || !tipo) {
     return res.status(400).json({ error: 'Faltan datos' });
   }
 
   try {
-    let data = await obtenerDetallesPorId(id_api, 'movie');
-    let tipo = 'pelicula';
-
-    if (!data || data.success === false) {
-      data = await obtenerDetallesPorId(id_api, 'tv');
-      tipo = 'serie';
-    }
+    const tipoTMDB = tipo === 'pelicula' ? 'movie' : 'tv';
+    const data = await obtenerDetallesPorId(id_api, tipoTMDB);
 
     if (!data || data.success === false) {
       return res.status(404).json({ error: 'Contenido no encontrado en TMDB' });
@@ -88,6 +81,7 @@ const agregarContenidoController = async (req, res) => {
       id_contenidoGuardado = rows[0].id;
     }
 
+    await otorgarXP(id_usuario, 'favorito');
     await verificarLogros(id_usuario);
 
     res.status(201).json({

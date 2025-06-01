@@ -16,7 +16,7 @@ interface Props {
 
 export default function UltimasCalificaciones({ calificaciones }: Props) {
   const navigate = useNavigate();
-  const limiteInicial = 15;
+  const limiteInicial = 7;
 
   const nick = localStorage.getItem("nick"); // Asegúrate de tener esto guardado al hacer login
 

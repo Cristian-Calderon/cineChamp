@@ -8,29 +8,33 @@ const XP_POR_ACCION = {
 };
 
 function calcularNivelPorXP(xp) {
+  if (xp >= 1500) return 7;
   if (xp >= 1200) return 6;
-  if (xp >= 800) return 5;
-  if (xp >= 500) return 4;
-  if (xp >= 250) return 3;
-  if (xp >= 100) return 2;
+  if (xp >= 700) return 5;
+  if (xp >= 600) return 4;
+  if (xp >= 450) return 3;
+  if (xp >= 300) return 2;
   return 1;
-}
+} 
 
 function getProgresoXP(xp) {
   const niveles = [
     { nivel: 1, xp: 0 },
-    { nivel: 2, xp: 50 },
-    { nivel: 3, xp: 100 },
-    { nivel: 4, xp: 140 },
-    { nivel: 5, xp: 150 },
-    { nivel: 6, xp: 200 },
+    { nivel: 2, xp: 300 },
+    { nivel: 3, xp: 450 },
+    { nivel: 4, xp: 600 },
+    { nivel: 5, xp: 700 },
+    { nivel: 6, xp: 1200 },
+    { nivel: 7, xp: 1500 }
   ];
+
   const actual = niveles.findLast(n => xp >= n.xp);
   const siguiente = niveles.find(n => n.xp > xp);
+
   if (!siguiente) return 100;
+
   return Math.round(((xp - actual.xp) / (siguiente.xp - actual.xp)) * 100);
 }
-
 async function otorgarXP(id_usuario, tipoAccion) {
   const xp = XP_POR_ACCION[tipoAccion];
   if (!xp) return;

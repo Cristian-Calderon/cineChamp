@@ -65,6 +65,8 @@ export default function Buscador() {
     if (!modalItem) return;
 
     try {
+      console.log("Tipo TMDB:", modalItem.media_type);
+
       const tipoGuardado = "historial";
       const tipoContenido = modalItem.media_type === "movie" ? "pelicula" : "serie";
 
@@ -76,6 +78,7 @@ export default function Buscador() {
           id_usuario: userId,
           id_api: modalItem.id,
           tipoGuardado,
+          tipo: tipoContenido,
         }),
       });
 
