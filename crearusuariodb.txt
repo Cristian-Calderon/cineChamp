@@ -1,5 +1,7 @@
-CREATE USER 'cinechamp'@'localhost' IDENTIFIED BY 'admin123';
+# Creacion de base de datos dbcinechamp
+CREATE DATABASE dbcinechamp;
 
-GRANT ALL PRIVILEGES ON cinechampdb.* TO 'cinechamp'@'localhost';
-
+# Creacion de usuario cinechamp con contraseña admin123.
+CREATE USER 'cinechamp'@'localhost' IDENTIFIED BY 'admin123.';
+GRANT ALL PRIVILEGES ON dbcinechamp.* TO 'cinechamp'@'localhost';
 FLUSH PRIVILEGES;

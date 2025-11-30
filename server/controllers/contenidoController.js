@@ -120,8 +120,8 @@ const favoritoContenidoController = async (req, res) => {
     const titulo = data.title || data.name;
 
     await db.query(
-      'INSERT IGNORE INTO favoritos (id_usuario, id_tmdb, titulo) VALUES (?, ?, ?)',
-      [id_usuario, id_tmdb, titulo]
+      'INSERT IGNORE INTO favoritos (id_usuario, id_tmdb, tipo, titulo) VALUES (?, ?, ?, ?)',
+      [id_usuario, id_tmdb, tipo, titulo]
     );
 
     await verificarLogros(id_usuario);
@@ -138,25 +138,20 @@ const obtenerFavoritosPorUsuario = async (req, res) => {
 
   try {
     const [favoritos] = await db.query(
-      'SELECT id_tmdb FROM favoritos WHERE id_usuario = ?',
+      'SELECT id_tmdb, tipo FROM favoritos WHERE id_usuario = ?',
       [id_usuario]
     );
 
     const resultados = await Promise.all(
-      favoritos.map(async ({ id_tmdb }) => {
-        let data = await obtenerDetallesPorId(id_tmdb, 'movie');
-        let tipo = 'movie';
-
-        if (!data || data.success === false) {
-          data = await obtenerDetallesPorId(id_tmdb, 'tv');
-          tipo = 'tv';
-        }
+      favoritos.map(async ({ id_tmdb, tipo }) => {
+        const tipoTMDB = tipo === 'pelicula' ? 'movie' : 'tv';
+        const data = await obtenerDetallesPorId(id_tmdb, tipoTMDB);
 
         return {
           id: id_tmdb,
           title: data?.title || data?.name,
           posterUrl: `https://image.tmdb.org/t/p/w500${data?.poster_path}`,
-          media_type: tipo
+          media_type: tipoTMDB
         };
       })
     );
