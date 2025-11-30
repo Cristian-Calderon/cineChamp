@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import Login from "./pages/auth/Login/Login";
 import Register from "./pages/auth/Register/Register";
-
 import Perfil from "./pages/private/Perfil";
 import Buscador from "./pages/private/Buscador";
 import UsuarioResultado from "./pages/private/UsuarioResultado";
@@ -10,11 +12,13 @@ import BuscarUsuario from "./pages/private/BuscarUsuario";
 import EditarPerfil from "./pages/private/EditarPerfil";
 import ListaContenido from "./pages/private/ListaContenido";
 import PerfilPublico from "./pages/private/PerfilPublico";
+import PaginaPelicula from "./pages/private/PaginaPelicula";
+import FloatingMenu from "./components/FloatingMenu/FloatingMenu";
 
 // Verificar ruta /
 function HomeRedirect() {
   const token = localStorage.getItem("token");
-  const nick = localStorage.getItem("nick"); // asegúrate de guardarlo al hacer login
+  const nick = localStorage.getItem("nick");
   if (token && nick) {
     return <Navigate to={`/id/${nick}`} replace />;
   } else {
@@ -22,16 +26,29 @@ function HomeRedirect() {
   }
 }
 
+// Wrapper para páginas con FloatingMenu
+interface AuthLayoutProps {
+  children: React.ReactNode;
+  onLogout: () => void;
+}
 
+function AuthLayout({ children, onLogout }: AuthLayoutProps) {
+  const nick = localStorage.getItem("nick");
+  return (
+    <>
+      {children}
+      <FloatingMenu onLogout={onLogout} userNick={nick || undefined} />
+    </>
+  );
+}
 
 export default function App() {
-  // El token ya se lee directamente desde localStorage al iniciar
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("token"));
-
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("nick");
+    localStorage.removeItem("userId");
     setToken(null);
   };
 
@@ -39,61 +56,134 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-
-        {/* ruta raíz: envía a login o, si ya estás, a tu perfil */}
+        {/* Ruta raíz: redirige a login o perfil */}
         <Route path="/" element={<HomeRedirect />} />
 
-        <Route
-          path="/login"
-          element={<Login setToken={setToken} />}
-        />
+        {/* Rutas públicas (sin FloatingMenu) */}
+        <Route path="/login" element={<Login setToken={setToken} />} />
+        <Route path="/register" element={token ? <Navigate to="/" /> : <Register />} />
 
-        <Route
-          path="/register"
-          element={token ? <Navigate to="/" /> : <Register />}
-        />
-
+        {/* Rutas protegidas (con FloatingMenu) */}
         <Route
           path="/id/:nick"
           element={
             token ? (
-              <Perfil onLogout={handleLogout} />
+              <AuthLayout onLogout={handleLogout}>
+                <Perfil onLogout={handleLogout} />
+              </AuthLayout>
             ) : (
               <Navigate to="/login" />
             )
           }
         />
 
-
         <Route
           path="/id/:nick/buscador"
           element={
-            token ? <Buscador /> : <Navigate to="/login" />
+            token ? (
+              <AuthLayout onLogout={handleLogout}>
+                <Buscador />
+              </AuthLayout>
+            ) : (
+              <Navigate to="/login" />
+            )
           }
         />
 
-        
-
         <Route
           path="/usuario/resultado"
-          element={token ? <UsuarioResultado /> : <Navigate to="/login" />}
+          element={
+            token ? (
+              <AuthLayout onLogout={handleLogout}>
+                <UsuarioResultado />
+              </AuthLayout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
         />
 
-        <Route path="/buscar-usuario" element={<BuscarUsuario />} />
-        <Route path="/editar-perfil" element={<EditarPerfil />} />
+        <Route
+          path="/buscar-usuario"
+          element={
+            token ? (
+              <AuthLayout onLogout={handleLogout}>
+                <BuscarUsuario />
+              </AuthLayout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
 
+        <Route
+          path="/editar-perfil"
+          element={
+            token ? (
+              <AuthLayout onLogout={handleLogout}>
+                <EditarPerfil />
+              </AuthLayout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
 
-        <Route path="/usuario/:nick/lista/:section/:media_type"
-          element={token ? <ListaContenido /> : <Navigate to="/login" replace />}
+        <Route
+          path="/usuario/:nick/lista/:section/:media_type"
+          element={
+            token ? (
+              <AuthLayout onLogout={handleLogout}>
+                <ListaContenido />
+              </AuthLayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
         />
 
         <Route
           path="/usuario/:nick"
-          element={token ? <PerfilPublico /> : <Navigate to="/login" />}
+          element={
+            token ? (
+              <AuthLayout onLogout={handleLogout}>
+                <PerfilPublico />
+              </AuthLayout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+
+        <Route
+          path="/contenido/:tipo/:id"
+          element={
+            token ? (
+              <AuthLayout onLogout={handleLogout}>
+                <PaginaPelicula />
+              </AuthLayout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
         />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+
+      {/* Toast Container global */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </BrowserRouter>
   );
 }

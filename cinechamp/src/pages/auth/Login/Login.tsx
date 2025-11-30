@@ -1,9 +1,7 @@
-// Login.tsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from "react-router-dom";
-
-// dentro del componente:
+import { Film, Mail, Lock, LogIn, Sparkles } from "lucide-react";
 
 interface LoginProps {
   setToken: (token: string) => void;
@@ -13,81 +11,165 @@ function Login({ setToken }: LoginProps) {
   const [email, setEmail] = useState('');
   const [contraseña, setContraseña] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
     try {
       const response = await axios.post('http://localhost:3001/api/usuarios/login', {
         email,
         contraseña,
       });
 
-      
       const { token, nick, id } = response.data as { token: string; nick: string; id: string };
-      // Guardamos el token en localStorage
+
       localStorage.setItem('token', token);
       localStorage.setItem('nick', nick);
       localStorage.setItem("userId", id);
-      // Actualizamos el estado en App
+
       setToken(token);
-      navigate(`/id/${nick}`)
+      navigate(`/id/${nick}`);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Error al iniciar sesión');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center mb-6">Iniciar Sesión</h2>
-        <form onSubmit={handleSubmit}>
-          {error && (
-            <p className="text-red-500 text-sm mb-4">
-              {error}
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden px-4 bg-gradient-mesh">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-40" />
+
+      {/* Floating Orbs */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-cinechamp-accent-primary/20 rounded-full blur-3xl animate-float" />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-cinechamp-accent-secondary/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+
+      {/* Login Card */}
+      <div className="relative z-10 w-full max-w-md animate-scale-in">
+        {/* Logo Header */}
+        <div className="text-center mb-8 space-y-3">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="p-3 bg-gradient-accent rounded-2xl shadow-glow-accent">
+              <Film className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-5xl font-bold text-gradient">CineChamp</h1>
+          </div>
+          <p className="text-cinechamp-text-secondary flex items-center justify-center gap-2">
+            <Sparkles className="w-4 h-4" />
+            Tu plataforma de seguimiento cinematográfico
+          </p>
+        </div>
+
+        {/* Card */}
+        <div className="card-glass p-8 space-y-6">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-center">Bienvenido de nuevo</h2>
+            <p className="text-sm text-center text-cinechamp-text-secondary">
+              Inicia sesión para continuar
             </p>
-          )}
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-1" htmlFor="email">
-              Email:
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
           </div>
 
-          <div className="mb-6">
-            <label className="block text-gray-700 mb-1" htmlFor="contraseña">
-              Contraseña:
-            </label>
-            <input
-              id="contraseña"
-              type="password"
-              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={contraseña}
-              onChange={(e) => setContraseña(e.target.value)}
-              required
-            />
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Error Message */}
+            {error && (
+              <div className="p-4 bg-cinechamp-accent-error/10 border border-cinechamp-accent-error/30 rounded-lg animate-slide-down">
+                <p className="text-cinechamp-accent-error text-sm text-center">
+                  {error}
+                </p>
+              </div>
+            )}
+
+            {/* Email Input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-cinechamp-text-secondary" htmlFor="email">
+                Correo Electrónico
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-cinechamp-text-tertiary" />
+                <input
+                  id="email"
+                  type="email"
+                  className="input-modern pl-11"
+                  placeholder="tu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Password Input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-cinechamp-text-secondary" htmlFor="contraseña">
+                Contraseña
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-cinechamp-text-tertiary" />
+                <input
+                  id="contraseña"
+                  type="password"
+                  className="input-modern pl-11"
+                  placeholder="••••••••"
+                  value={contraseña}
+                  onChange={(e) => setContraseña(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Iniciando sesión...
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-5 h-5" />
+                  Iniciar Sesión
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-cinechamp-border-primary" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-2 bg-cinechamp-bg-elevated text-cinechamp-text-tertiary">
+                ¿Primera vez aquí?
+              </span>
+            </div>
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded transition-colors"
-          >
-            Ingresar
-          </button>
-        </form>
+          {/* Register Link */}
+          <div className="text-center">
+            <Link
+              to="/register"
+              className="text-cinechamp-accent-primary hover:text-cinechamp-accent-secondary font-semibold transition-colors inline-flex items-center gap-2 group"
+            >
+              Crear una cuenta nueva
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </Link>
+          </div>
+        </div>
 
-        <p className="text-center text-sm text-gray-600 mt-6">
-          ¿No tienes cuenta?{' '}
-          <Link to="/register" className="text-blue-500 hover:underline">
-            Regístrate
-          </Link>
+        {/* Footer */}
+        <p className="text-center text-xs text-cinechamp-text-tertiary mt-6">
+          Al iniciar sesión, aceptas nuestros términos y condiciones
         </p>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
+import { Search, UserPlus, Trophy, Users as UsersIcon, Star, Film, Tv, Edit } from "lucide-react";
 import Carrusel from "../../components/CarucelContenido/Carrusel";
 
 type Movie = {
@@ -54,11 +55,9 @@ type Calificacion = {
   posterUrl: string;
 };
 
-
-
 export default function Perfil({ onLogout }: PerfilProps) {
   const { nick } = useParams();
-  const location = useLocation(); // 👈 para detectar query param
+  const location = useLocation();
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState<Profile>({ name: "", photoUrl: "" });
@@ -70,8 +69,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
   const [userId, setUserId] = useState<number | null>(null);
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [amigos, setAmigos] = useState<Amigo[]>([]);
-  const [calificaciones, setCalificaciones] = useState<Calificacion[]>([])
-  const goHome = () => navigate("/");
+  const [calificaciones, setCalificaciones] = useState<Calificacion[]>([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -85,7 +83,6 @@ export default function Perfil({ onLogout }: PerfilProps) {
       .then(setCalificaciones)
       .catch(console.error);
   }, [userId]);
-
 
   useEffect(() => {
     if (!nick) return;
@@ -158,10 +155,8 @@ export default function Perfil({ onLogout }: PerfilProps) {
     if (!nick || !token || !userId) return;
 
     try {
-      // 🧠 Primero forza verificación
       await fetch(`http://localhost:3001/api/logros/forzar/${userId}`);
 
-      // 📥 Luego carga los logros actualizados
       const res = await fetch(`http://localhost:3001/api/logros/${nick}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -173,8 +168,6 @@ export default function Perfil({ onLogout }: PerfilProps) {
     }
   };
 
-
-  // ✅ Cargar logros al inicio Y si ?refrescar=1 está en la URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const necesitaRecarga = params.get("refrescar") === "1";
@@ -206,144 +199,256 @@ export default function Perfil({ onLogout }: PerfilProps) {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    onLogout();
-    navigate("/login");
-  };
-
   return (
-    <div className="p-6 w-full">
-      <h1 className="text-3xl font-bold mb-6">CineChamp</h1>
-  
-      {/* Perfil y buscadores */}
-      <div className="w-full bg-white border rounded-xl p-4 shadow-md mb-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-20 h-20 border-4 border-gray-300 rounded-full overflow-hidden">
-            <img src={profile.photoUrl} alt="Foto de perfil" className="w-full h-full object-cover" />
+    <div className="min-h-screen bg-gradient-dark pb-20">
+      {/* Header con gradiente */}
+      <div className="relative bg-gradient-mesh border-b border-cinechamp-border-primary">
+        <div className="container-cinechamp py-8">
+          {/* Perfil Header */}
+          <div className="card-glass p-6 mb-6 animate-fade-in">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+              {/* Avatar */}
+              <div className="relative group">
+                <div className="w-32 h-32 rounded-full border-4 border-cinechamp-accent-primary shadow-glow-accent overflow-hidden">
+                  <img
+                    src={profile.photoUrl}
+                    alt="Perfil"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="absolute inset-0 rounded-full bg-gradient-accent opacity-0 group-hover:opacity-20 transition-opacity" />
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 text-center md:text-left">
+                <h1 className="text-3xl font-bold mb-2 text-gradient">{profile.name}</h1>
+                <div className="flex flex-wrap gap-4 justify-center md:justify-start text-sm text-cinechamp-text-secondary mb-4">
+                  <span className="flex items-center gap-1">
+                    <Film className="w-4 h-4" />
+                    {historial.filter(h => h.media_type === "movie").length} películas
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Tv className="w-4 h-4" />
+                    {historial.filter(h => h.media_type === "tv").length} series
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Trophy className="w-4 h-4" />
+                    {achievements.length} logros
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <UsersIcon className="w-4 h-4" />
+                    {amigos.length} amigos
+                  </span>
+                </div>
+                <button
+                  onClick={() => navigate(`/editar-perfil`)}
+                  className="btn-secondary inline-flex items-center gap-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  Editar Perfil
+                </button>
+              </div>
+            </div>
           </div>
-          <div>
-            <p className="text-lg font-semibold">{profile.name}</p>
-            <button
-              onClick={() => navigate(`/editar-perfil`)}
-              className="mt-1 bg-indigo-600 text-white px-3 py-1 rounded text-sm"
-            >Editar Perfil</button>
-            <button onClick={handleLogout} className="mt-2 ml-2 bg-red-500 text-white px-2 py-1 rounded text-sm">Cerrar sesión</button>
-          </div>
-        </div>
-  
-        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto justify-end">
-          <div className="flex gap-2 w-full sm:w-64">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="border p-2 rounded w-full"
-              placeholder="Buscar película o serie"
-            />
-            <button onClick={buscarPeliculas} className="bg-blue-600 text-white px-3 rounded">Buscar</button>
-          </div>
-          <div className="flex gap-2 w-full sm:w-64">
-            <input
-              value={nickAmigo}
-              onChange={(e) => setNickAmigo(e.target.value)}
-              className="border p-2 rounded w-full"
-              placeholder="Buscar amigo"
-            />
-            <button onClick={buscarAmigo} className="bg-green-600 text-white px-3 rounded">Buscar</button>
+
+          {/* Search Bars */}
+          <div className="grid md:grid-cols-2 gap-4 animate-slide-up">
+            {/* Buscar Contenido */}
+            <div className="card-glass p-4">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-cinechamp-text-tertiary" />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && buscarPeliculas()}
+                    className="input-modern pl-11"
+                    placeholder="Buscar película o serie"
+                  />
+                </div>
+                <button onClick={buscarPeliculas} className="btn-primary px-4">
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Buscar Amigos */}
+            <div className="card-glass p-4">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-cinechamp-text-tertiary" />
+                  <input
+                    value={nickAmigo}
+                    onChange={(e) => setNickAmigo(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && buscarAmigo()}
+                    className="input-modern pl-11"
+                    placeholder="Buscar amigo"
+                  />
+                </div>
+                <button onClick={buscarAmigo} className="btn-primary px-4">
+                  <UserPlus className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-  
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Izquierda: Historial y Favoritos */}
-        <div className="w-full lg:w-1/2 flex flex-col gap-6">
-          <Carrusel
-            titulo="🎬 Historial - Películas"
-            items={historial.filter(h => h.media_type === "movie").slice(0, 10)}
-            onVerMas={() => navigate(`/usuario/${nick}/lista/historial/movie`)}
-          />
-          <Carrusel
-            titulo="📺 Historial - Series"
-            items={historial.filter(h => h.media_type === "tv").slice(0, 10)}
-            onVerMas={() => navigate(`/usuario/${nick}/lista/historial/tv`)}
-          />
-          <Carrusel
-            titulo="🎬 Tus Películas Favoritas"
-            items={favorites.filter(f => f.media_type === "movie").slice(0, 10)}
-            onVerMas={() => navigate(`/usuario/${nick}/lista/favoritos/movie`)}
-          />
-          <Carrusel
-            titulo="📺 Tus Series Favoritas"
-            items={favorites.filter(f => f.media_type === "tv").slice(0, 10)}
-            onVerMas={() => navigate(`/usuario/${nick}/lista/favoritos/tv`)}
-          />
-        </div>
-  
-        {/* Derecha: Logros, Amigos, Calificaciones, Solicitudes */}
-        <div className="w-full lg:w-1/2 flex flex-col gap-6">
-          <div className="border rounded-xl p-4 shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">Logros</h2>
-            <div className="flex flex-wrap gap-4">
-              {achievements.map((logro) => (
-                <div key={logro.id} className="w-20 flex flex-col items-center text-center" title={`${logro.title} - ${logro.description}`}>
-                  <img src={logro.image_url} alt={logro.title} className="w-[40px] h-[40px] object-contain border rounded shadow-md" />
-                  <span className="text-xs mt-1">{logro.title}</span>
-                </div>
-              ))}
-            </div>
+
+      {/* Main Content */}
+      <div className="container-cinechamp mt-8">
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Left Column - Contenido (2/3) */}
+          <div className="lg:col-span-2 space-y-6">
+            <Carrusel
+              titulo="🎬 Historial - Películas"
+              items={historial.filter(h => h.media_type === "movie").slice(0, 10)}
+              onVerMas={() => navigate(`/usuario/${nick}/lista/historial/movie`)}
+            />
+            <Carrusel
+              titulo="📺 Historial - Series"
+              items={historial.filter(h => h.media_type === "tv").slice(0, 10)}
+              onVerMas={() => navigate(`/usuario/${nick}/lista/historial/tv`)}
+            />
+            <Carrusel
+              titulo="⭐ Películas Favoritas"
+              items={favorites.filter(f => f.media_type === "movie").slice(0, 10)}
+              onVerMas={() => navigate(`/usuario/${nick}/lista/favoritos/movie`)}
+            />
+            <Carrusel
+              titulo="💜 Series Favoritas"
+              items={favorites.filter(f => f.media_type === "tv").slice(0, 10)}
+              onVerMas={() => navigate(`/usuario/${nick}/lista/favoritos/tv`)}
+            />
           </div>
-  
-          <div className="border rounded-xl p-4 shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">Mis Amigos</h2>
-            {amigos.length === 0 ? (
-              <p className="text-gray-500">No tienes amigos aún.</p>
-            ) : (
-              <div className="flex flex-wrap gap-4">
-                {amigos.map((amigo) => (
-                  <div key={amigo.id} className="text-center">
-                    <img src={amigo.avatar || "https://i.pravatar.cc/150"} className="w-14 h-14 rounded-full border mb-1 object-cover" alt={amigo.nick} />
-                    <p className="text-sm">{amigo.nick}</p>
-                  </div>
-                ))}
+
+          {/* Right Column - Sidebar (1/3) */}
+          <div className="space-y-6">
+            {/* Logros */}
+            <div className="card-glass p-6 animate-slide-left">
+              <div className="flex items-center gap-2 mb-4">
+                <Trophy className="w-5 h-5 text-cinechamp-accent-tertiary" />
+                <h2 className="text-xl font-bold">Logros</h2>
               </div>
-            )}
-          </div>
-  
-          <div className="border rounded-xl p-4 shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">Últimas Calificaciones</h2>
-            {calificaciones.length === 0 ? (
-              <p className="text-gray-500">No has calificado ningún contenido aún.</p>
-            ) : (
-              <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                {calificaciones.map((item) => (
-                  <div key={item.id} className="flex gap-4 items-start border-b pb-2">
-                    <img src={item.posterUrl} className="w-12 h-16 object-cover rounded" />
-                    <div>
-                      <p className="font-medium">{item.titulo}</p>
-                      <p className="text-sm text-gray-600">⭐ {item.puntuacion}/10</p>
-                      {item.comentario && <p className="text-sm italic text-gray-700">“{item.comentario}”</p>}
+              {achievements.length === 0 ? (
+                <p className="text-cinechamp-text-tertiary text-sm">No hay logros aún</p>
+              ) : (
+                <div className="grid grid-cols-4 gap-3">
+                  {achievements.map((logro) => (
+                    <div
+                      key={logro.id}
+                      className="group relative"
+                      title={`${logro.title} - ${logro.description}`}
+                    >
+                      <div className="aspect-square rounded-lg overflow-hidden border border-cinechamp-border-primary group-hover:border-cinechamp-accent-primary transition-colors">
+                        <img
+                          src={logro.image_url}
+                          alt={logro.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Solicitudes de Amistad */}
+            {solicitudes.length > 0 && (
+              <div className="card-glass p-6 animate-slide-left" style={{ animationDelay: '0.1s' }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <UserPlus className="w-5 h-5 text-cinechamp-accent-secondary" />
+                  <h2 className="text-xl font-bold">Solicitudes</h2>
+                  <span className="ml-auto bg-cinechamp-accent-primary text-white text-xs px-2 py-1 rounded-full">
+                    {solicitudes.length}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {solicitudes.map((s) => (
+                    <div
+                      key={`amigo-${s.id}`}
+                      className="flex items-center gap-3 p-3 bg-cinechamp-bg-tertiary rounded-lg hover:bg-cinechamp-bg-hover transition-colors"
+                    >
+                      <img
+                        src={s.avatar || "https://i.pravatar.cc/150"}
+                        className="w-10 h-10 rounded-full object-cover border border-cinechamp-border-primary"
+                        alt={s.nick}
+                      />
+                      <span className="flex-1 font-medium text-sm">{s.nick}</span>
+                      <button
+                        onClick={() => aceptarSolicitud(s.id)}
+                        className="px-3 py-1.5 bg-cinechamp-accent-success text-white text-xs rounded-lg hover:bg-cinechamp-accent-success/80 transition-colors"
+                      >
+                        Aceptar
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-          </div>
-  
-          <div className="border rounded-xl p-4 shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">Solicitudes de amistad</h2>
-            {solicitudes.length === 0 ? (
-              <p className="text-gray-500">No tienes solicitudes pendientes.</p>
-            ) : (
-              <div className="space-y-3">
-                {solicitudes.map((s) => (
-                  <div key={`amigo-${s.id}`} className="flex items-center gap-4">
-                    <img src={s.avatar || "https://i.pravatar.cc/150"} className="w-10 h-10 rounded-full object-cover border" />
-                    <span className="flex-1 font-medium">{s.nick}</span>
-                    <button onClick={() => aceptarSolicitud(s.id)} className="bg-green-500 text-white px-3 py-1 rounded text-sm">Aceptar</button>
-                  </div>
-                ))}
+
+            {/* Amigos */}
+            <div className="card-glass p-6 animate-slide-left" style={{ animationDelay: '0.2s' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <UsersIcon className="w-5 h-5 text-cinechamp-accent-primary" />
+                <h2 className="text-xl font-bold">Amigos</h2>
               </div>
-            )}
+              {amigos.length === 0 ? (
+                <p className="text-cinechamp-text-tertiary text-sm">No tienes amigos aún</p>
+              ) : (
+                <div className="grid grid-cols-3 gap-3">
+                  {amigos.slice(0, 6).map((amigo) => (
+                    <div key={amigo.id} className="text-center group cursor-pointer">
+                      <div className="aspect-square rounded-lg overflow-hidden border border-cinechamp-border-primary group-hover:border-cinechamp-accent-primary transition-colors mb-1">
+                        <img
+                          src={amigo.avatar || "https://i.pravatar.cc/150"}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                          alt={amigo.nick}
+                        />
+                      </div>
+                      <p className="text-xs truncate text-cinechamp-text-secondary">{amigo.nick}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Últimas Calificaciones */}
+            <div className="card-glass p-6 animate-slide-left" style={{ animationDelay: '0.3s' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <Star className="w-5 h-5 text-cinechamp-accent-tertiary" />
+                <h2 className="text-xl font-bold">Calificaciones</h2>
+              </div>
+              {calificaciones.length === 0 ? (
+                <p className="text-cinechamp-text-tertiary text-sm">No has calificado contenido aún</p>
+              ) : (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                  {calificaciones.slice(0, 5).map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex gap-3 p-3 bg-cinechamp-bg-tertiary rounded-lg hover:bg-cinechamp-bg-hover transition-colors"
+                    >
+                      <img
+                        src={item.posterUrl}
+                        className="w-12 h-16 object-cover rounded border border-cinechamp-border-primary"
+                        alt={item.titulo}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{item.titulo}</p>
+                        <div className="flex items-center gap-1 text-cinechamp-accent-tertiary mt-1">
+                          <Star className="w-3 h-3 fill-current" />
+                          <span className="text-xs font-bold">{item.puntuacion}/10</span>
+                        </div>
+                        {item.comentario && (
+                          <p className="text-xs text-cinechamp-text-tertiary mt-1 line-clamp-2 italic">
+                            "{item.comentario}"
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -1,3 +1,130 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Estilos globales - Tema Moderno Dark */
+@layer base {
+  * {
+    @apply border-cinechamp-border-primary;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-cinechamp-bg-primary text-cinechamp-text-primary antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Scrollbar personalizado moderno */
+  ::-webkit-scrollbar {
+    @apply w-2.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-cinechamp-bg-secondary;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-cinechamp-accent-primary/40 rounded-full hover:bg-cinechamp-accent-primary/60 transition-colors;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-cinechamp-accent-primary/80;
+  }
+}
+
+/* Componentes reutilizables */
+@layer components {
+  /* Botón primario con gradiente */
+  .btn-primary {
+    @apply px-6 py-3 bg-gradient-accent text-white font-semibold rounded-lg
+           shadow-glow-accent hover:shadow-glow-cyan transition-all duration-300
+           hover:scale-105 active:scale-95;
+  }
+
+  /* Botón secundario */
+  .btn-secondary {
+    @apply px-6 py-3 bg-cinechamp-bg-elevated text-cinechamp-text-primary
+           font-semibold rounded-lg border border-cinechamp-border-primary
+           hover:bg-cinechamp-bg-hover hover:border-cinechamp-accent-primary
+           transition-all duration-300;
+  }
+
+  /* Card con efecto glass */
+  .card-glass {
+    @apply bg-glass backdrop-blur-xl border border-cinechamp-border-primary
+           rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300;
+  }
+
+  /* Input moderno */
+  .input-modern {
+    @apply w-full px-4 py-3 bg-cinechamp-bg-tertiary border border-cinechamp-border-primary
+           rounded-lg text-cinechamp-text-primary placeholder-cinechamp-text-tertiary
+           focus:outline-none focus:ring-2 focus:ring-cinechamp-accent-primary
+           focus:border-transparent transition-all;
+  }
+}
+
+/* Utilidades personalizadas */
+@layer utilities {
+  /* Sombras de texto */
+  .text-shadow {
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  }
+
+  .text-shadow-glow {
+    text-shadow: 0 0 20px rgba(79, 195, 247, 0.6);
+  }
+
+  /* Gradient overlay para imágenes */
+  .gradient-overlay {
+    @apply relative;
+  }
+
+  .gradient-overlay::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-t from-cinechamp-bg-primary via-transparent to-transparent pointer-events-none;
+  }
+
+  /* Efecto hover para tarjetas de películas/series */
+  .movie-card {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .movie-card:hover {
+    @apply scale-105 z-10 shadow-glow-accent;
+  }
+
+  /* Animaciones de entrada */
+  .fade-in {
+    @apply animate-fade-in;
+  }
+
+  .slide-up {
+    @apply animate-slide-up;
+  }
+
+  .slide-down {
+    @apply animate-slide-down;
+  }
+
+  /* Container responsive personalizado */
+  .container-cinechamp {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Efecto glassmorphism mejorado */
+  .glass-effect {
+    @apply bg-cinechamp-bg-elevated/40 backdrop-blur-xl border border-white/10;
+  }
+
+  /* Gradiente de texto */
+  .text-gradient {
+    @apply bg-gradient-accent bg-clip-text text-transparent;
+  }
+}

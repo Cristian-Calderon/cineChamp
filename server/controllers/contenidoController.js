@@ -254,6 +254,23 @@ const obtenerCalificacionesDelUsuario = async (req, res) => {
   }
 };
 
+const obtenerDetallesContenido = async (req, res) => {
+  const { tipo, id } = req.params;
+
+  try {
+    const data = await obtenerDetallesPorId(id, tipo);
+
+    if (!data || data.success === false) {
+      return res.status(404).json({ error: 'Contenido no encontrado' });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error('❌ Error al obtener detalles:', error);
+    res.status(500).json({ error: 'Error al obtener detalles del contenido' });
+  }
+};
+
 
 
 
@@ -268,5 +285,6 @@ module.exports = {
   obtenerHistorialPorUsuario,
   obtenerFavoritosPorUsuario,
   calificarContenido,
-  obtenerCalificacionesDelUsuario
+  obtenerCalificacionesDelUsuario,
+  obtenerDetallesContenido
 };

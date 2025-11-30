@@ -36,9 +36,9 @@ const buscarSeries = async (query) => {
 //funcion con 2 parametros
 const obtenerDetallesPorId = async (id, tipo = 'movie') => {
   try {
-    //peticion a  tmmdb
+    //peticion a  tmmdb con créditos incluidos
     const res = await fetch(
-      `${BASE_URL}/${tipo}/${id}?api_key=${API_KEY}&language=es-ES`
+      `${BASE_URL}/${tipo}/${id}?api_key=${API_KEY}&language=es-ES&append_to_response=credits`
     );
     const data = await res.json();
     return data;
