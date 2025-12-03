@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { User, UserPlus, UserMinus, Film, Tv, Award, Users as UsersIcon, Search, ArrowLeft, Clock, CheckCircle } from "lucide-react";
 import { toast } from "react-toastify";
+import AvatarConNivel from "../../components/Avatar/AvatarConNivel";
 
 type Movie = {
   id: number;
@@ -27,6 +28,7 @@ type UserResponse = {
   id: number;
   nick: string;
   avatar?: string;
+  experiencia?: number;
 };
 
 type Amigo = {
@@ -48,6 +50,7 @@ export default function PerfilPublico() {
   const [nickAmigo, setNickAmigo] = useState("");
   const [userIdPerfil, setUserIdPerfil] = useState<number | null>(null);
   const [estadoRelacion, setEstadoRelacion] = useState<string | null>(null);
+  const [experiencia, setExperiencia] = useState<number>(0);
 
   const userIdLogueado = parseInt(localStorage.getItem("userId") || "0");
 
@@ -71,6 +74,7 @@ export default function PerfilPublico() {
           name: user.nick,
           photoUrl: user.avatar || "https://i.pravatar.cc/150?img=3",
         });
+        setExperiencia(user.experiencia || 0);
       })
       .catch((err) => {
         console.error("Error al obtener usuario público:", err);
@@ -207,8 +211,13 @@ export default function PerfilPublico() {
           <div className="flex flex-col md:flex-row items-center gap-6">
             {/* Avatar y botones de amistad */}
             <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="w-24 h-24 rounded-full border-4 border-cinechamp-accent-primary shadow-glow-accent overflow-hidden">
-                <img src={profile.photoUrl} alt="Foto de perfil" className="w-full h-full object-cover" />
+              <div className="group">
+                <AvatarConNivel
+                  photoUrl={profile.photoUrl}
+                  experiencia={experiencia}
+                  size="md"
+                  showLevel={true}
+                />
               </div>
               <div className="text-center sm:text-left">
                 <p className="text-xl font-bold text-gradient mb-3">{profile.name}</p>

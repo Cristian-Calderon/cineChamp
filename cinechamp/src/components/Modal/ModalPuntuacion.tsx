@@ -108,7 +108,38 @@ export default function ModalPuntuacion({
               min="1"
               max="10"
               value={puntuacion}
-              onChange={(e) => setPuntuacion(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+
+                // Permitir campo vacío (para borrar)
+                if (value === "") {
+                  setPuntuacion("");
+                  return;
+                }
+
+                // Convertir a número
+                const num = parseInt(value, 10);
+
+                // Solo permitir números entre 1 y 10
+                if (!isNaN(num) && num >= 1 && num <= 10) {
+                  setPuntuacion(value);
+                }
+                // Si es mayor a 10, limitar a 10
+                else if (!isNaN(num) && num > 10) {
+                  setPuntuacion("10");
+                }
+                // Si es menor a 1 pero es un número válido, limitar a 1
+                else if (!isNaN(num) && num < 1 && num > 0) {
+                  setPuntuacion("1");
+                }
+              }}
+              onBlur={(e) => {
+                // Al perder el foco, si está vacío o es 0, poner 1
+                if (e.target.value === "" || parseInt(e.target.value, 10) === 0) {
+                  setPuntuacion("1");
+                }
+              }}
+              maxLength={2}
               className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-cinechamp-red-primary focus:border-transparent transition-all"
               placeholder="1-10"
             />

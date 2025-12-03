@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
-import { Search, UserPlus, Trophy, Users as UsersIcon, Star, Film, Tv, Edit } from "lucide-react";
+import { Search, UserPlus, Trophy, Users as UsersIcon, Star, Film, Tv } from "lucide-react";
 import Carrusel from "../../components/CarucelContenido/Carrusel";
+import AvatarConNivel from "../../components/Avatar/AvatarConNivel";
+import MenuUsuario from "../../components/MenuUsuario/MenuUsuario";
 
 type Movie = {
   id: number;
@@ -27,6 +29,7 @@ type UserResponse = {
   id: number;
   nick: string;
   avatar?: string;
+  experiencia?: number;
 };
 
 type Solicitud = {
@@ -70,6 +73,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [amigos, setAmigos] = useState<Amigo[]>([]);
   const [calificaciones, setCalificaciones] = useState<Calificacion[]>([]);
+  const [experiencia, setExperiencia] = useState<number>(0);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -102,6 +106,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
           name: user.nick,
           photoUrl: avatarUrl,
         });
+        setExperiencia(user.experiencia || 0);
       })
       .catch((err) => {
         console.error("Error al obtener usuario:", err);
@@ -207,16 +212,14 @@ export default function Perfil({ onLogout }: PerfilProps) {
           {/* Perfil Header */}
           <div className="card-glass p-6 mb-6 animate-fade-in">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-              {/* Avatar */}
-              <div className="relative group">
-                <div className="w-32 h-32 rounded-full border-4 border-cinechamp-accent-primary shadow-glow-accent overflow-hidden">
-                  <img
-                    src={profile.photoUrl}
-                    alt="Perfil"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="absolute inset-0 rounded-full bg-gradient-accent opacity-0 group-hover:opacity-20 transition-opacity" />
+              {/* Avatar con anillo de nivel */}
+              <div className="group">
+                <AvatarConNivel
+                  photoUrl={profile.photoUrl}
+                  experiencia={experiencia}
+                  size="lg"
+                  showLevel={true}
+                />
               </div>
 
               {/* Info */}
@@ -240,13 +243,7 @@ export default function Perfil({ onLogout }: PerfilProps) {
                     {amigos.length} amigos
                   </span>
                 </div>
-                <button
-                  onClick={() => navigate(`/editar-perfil`)}
-                  className="btn-secondary inline-flex items-center gap-2"
-                >
-                  <Edit className="w-4 h-4" />
-                  Editar Perfil
-                </button>
+                <MenuUsuario onLogout={onLogout} />
               </div>
             </div>
           </div>

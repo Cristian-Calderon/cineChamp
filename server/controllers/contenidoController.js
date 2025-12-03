@@ -93,6 +93,7 @@ const agregarContenidoController = async (req, res) => {
     );
 
     let id_contenidoGuardado = result.insertId;
+    let esNuevo = !!id_contenidoGuardado;
 
     if (!id_contenidoGuardado) {
       const [rows] = await db.query(
@@ -105,10 +106,15 @@ const agregarContenidoController = async (req, res) => {
       id_contenidoGuardado = rows[0].id;
     }
 
+    // ✨ Agregar XP solo si es nuevo (no duplicado)
+    if (esNuevo) {
+      await agregarExperiencia(id_usuario, RECOMPENSAS_XP.AGREGAR_HISTORIAL);
+    }
+
     await verificarLogros(id_usuario);
 
     res.status(201).json({
-      message: `${tipoGuardado === 'pelicula' ? 'Película' : 'Serie'} agregada correctamente.`,
+      message: `${tipoGuardado === 'pelicula' ? 'Película' : 'Serie'} agregada correctamente.${esNuevo ? ' (+5 XP)' : ''}`,
       id_contenidoGuardado,
     });
   } catch (error) {
@@ -237,25 +243,37 @@ const obtenerHistorialPorUsuario = async (req, res) => {
   }
 };
 
+const { agregarExperiencia, RECOMPENSAS_XP } = require('../utils/experienciaHelper');
+
 const calificarContenido = async (req, res) => {
   const { id_usuario, id_api, tipo, puntuacion, comentario } = req.body;
   console.log("📩 Body recibido en /calificar:", req.body);
 
-  if (!id_usuario || !id_api || !tipo || !puntuacion) {
+  if (!id_usuario || !id_api || !tipo || puntuacion === undefined || puntuacion === null) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 
-  if (puntuacion < 1 || puntuacion > 10) {
+  // Validar que puntuacion sea un número válido
+  const puntuacionNum = parseInt(puntuacion, 10);
+  if (isNaN(puntuacionNum)) {
+    return res.status(400).json({ error: 'La puntuación debe ser un número válido' });
+  }
+
+  // Validar que esté en el rango 1-10
+  if (puntuacionNum < 1 || puntuacionNum > 10) {
     return res.status(400).json({ error: 'La puntuación debe estar entre 1 y 10' });
   }
 
   try {
     await db.query(
       'INSERT INTO calificacion (id_usuario, id_api, tipo, puntuacion, comentario) VALUES (?, ?, ?, ?, ?)',
-      [id_usuario, id_api, tipo, puntuacion, comentario || null]
+      [id_usuario, id_api, tipo, puntuacionNum, comentario || null]
     );
 
-    res.status(201).json({ message: '✅ Calificación guardada correctamente' });
+    // ✨ Agregar XP por calificar
+    await agregarExperiencia(id_usuario, RECOMPENSAS_XP.CALIFICAR_CONTENIDO);
+
+    res.status(201).json({ message: '✅ Calificación guardada correctamente (+10 XP)' });
   } catch (error) {
     console.error('❌ Error al guardar calificación:', error);
     res.status(500).json({ error: 'Error interno al guardar la calificación' });

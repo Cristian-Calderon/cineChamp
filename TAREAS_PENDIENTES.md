@@ -7,26 +7,20 @@
 
 ## 🎯 Tareas para implementar
 
-### 1. Validación de puntuación 1-10 en calificaciones
+### ~~1. Validación de puntuación 1-10 en calificaciones~~ ✅ COMPLETADA
 **Descripción:**
-- Actualmente el input de puntuación no está limitado correctamente
-- Se puede ingresar cualquier número (mayor a 10, números con más de 2 dígitos, etc.)
-- Debe limitarse a:
-  - Solo permitir números del 1 al 10
-  - Máximo 2 dígitos
-  - Validación en tiempo real (mientras el usuario escribe)
-  - Validación en el backend también
+- ✅ Input validado con limitación en tiempo real
+- ✅ Solo permite números del 1 al 10
+- ✅ maxLength={2} implementado
+- ✅ Validación en backend mejorada (verifica NaN, rango 1-10)
 
-**Detalles técnicos:**
-- Frontend: `/cinechamp/src/components/Modal/ModalPuntuacion.tsx`
-- Frontend: `/cinechamp/src/pages/private/PaginaPelicula.tsx` (función `guardarEnHistorial`)
-- Frontend: `/cinechamp/src/pages/private/Buscador.tsx` (función `guardarContenido`)
-- Backend: `/server/controllers/contenidoController.js` (función `calificarContenido` línea 195)
-- Agregar validación en el input: `maxLength={2}`, `min={1}`, `max={10}`
-- Validar antes de enviar al backend
-- Mensaje de error claro si intenta poner un número inválido
+**Archivos modificados:**
+- ✅ `/cinechamp/src/components/Modal/ModalPuntuacion.tsx` - Validación en tiempo real
+- ✅ `/server/controllers/contenidoController.js` - Validación robusta en backend
 
-**Prioridad:** Alta
+**Fecha completada:** 2025-12-03
+
+**Prioridad:** ~~Alta~~ COMPLETADA
 
 ---
 
@@ -34,15 +28,32 @@
 **Descripción:**
 - Implementar funcionalidad para que cada usuario pueda subir su propia imagen de perfil
 - Actualmente existe un sistema de avatares predefinidos, pero se necesita permitir subida de archivos
-- El backend ya tiene Multer configurado para subida de archivos (ver `/server/utils/multerConfig.js`)
+- **NOTA:** El backend NO tiene Multer configurado aún, hay que crearlo desde cero
 - Se debe explicar paso a paso todo el proceso de implementación
+
+**Estado actual del sistema de avatares:**
+- Los avatares se guardan en la columna `avatar` de la tabla `usuario` (solo el nombre del archivo, ej: "Freak.png")
+- Avatares predefinidos están en `/server/assets/` (Elbicho.png, Freak.png, etc.)
+- El servidor sirve estos archivos estáticos desde `/assets`
+
+**Pregunta de diseño - ¿Cómo guardar las imágenes de cada usuario?**
+Opciones a considerar:
+1. **Archivo con nombre único por usuario:** `{userId}_avatar.jpg` en `/server/assets/uploads/`
+   - Ventaja: Simple, fácil de implementar
+   - Ventaja: Fácil encontrar y eliminar imagen anterior
+2. **Carpeta por usuario:** `/server/assets/uploads/{userId}/avatar.jpg`
+   - Ventaja: Organizado, permite múltiples archivos por usuario en el futuro
+   - Desventaja: Más complejo, más carpetas
+3. **Nombre con timestamp/UUID:** `/server/assets/uploads/abc123_1234567890.jpg`
+   - Ventaja: Evita colisiones de nombres
+   - Desventaja: Difícil eliminar imagen anterior (hay que buscar en DB)
 
 **Detalles técnicos:**
 - Backend:
-  - `/server/utils/multerConfig.js` - Ya existe configuración de Multer
-  - `/server/controllers/usuarioController.js` - Añadir endpoint para actualizar avatar
-  - `/server/routes/usuarioRoutes.js` - Ruta para subir imagen
-  - Carpeta de almacenamiento: `/server/assets/uploads`
+  - **CREAR:** `/server/utils/multerConfig.js` - Configurar Multer desde cero
+  - `/server/controllers/usuarioController.js` - Añadir endpoint para actualizar avatar con archivo
+  - `/server/routes/usuarioRoutes.js` - Ruta POST para subir imagen con middleware Multer
+  - Carpeta de almacenamiento: `/server/assets/uploads/` (crear si no existe)
 - Frontend:
   - `/cinechamp/src/pages/private/EditarPerfil.tsx` - Agregar input tipo file
   - `/cinechamp/src/components/Avatar.tsx` - Mostrar imagen personalizada
@@ -50,7 +61,7 @@
 - Consideraciones:
   - Validar tipo de archivo (solo imágenes: jpg, png, gif, webp)
   - Validar tamaño máximo (ej: 2MB)
-  - Optimizar/redimensionar imagen en el servidor
+  - Optimizar/redimensionar imagen en el servidor (opcional: usar sharp)
   - Eliminar imagen anterior al subir una nueva
   - Manejo de errores claro
 - **Importante:** Se debe explicar cada paso del proceso durante la implementación
@@ -124,15 +135,37 @@
   - Barra de progreso de experiencia
   - XP actual / XP necesario para siguiente nivel
   - Indicador visual atractivo (similar a Steam)
-- Ya existe componente `NivelSteam.tsx` en `/cinechamp/src/components/PerfilHeader/`
+- **NOTA:** Ya existe componente `NivelSteam.tsx` en `/cinechamp/src/components/PerfilHeader/` (verificar si existe)
+
+**Librería de círculo de progreso:**
+- Ya está instalada: `react-circular-progressbar` v2.2.0 (ver `cinechamp/package.json:18`)
+- Documentación: https://www.npmjs.com/package/react-circular-progressbar
+- Esta librería permite crear un círculo que se va completando conforme el usuario gana experiencia
+- Ejemplo de uso:
+  ```tsx
+  import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+  import 'react-circular-progressbar/dist/styles.css';
+
+  <CircularProgressbar
+    value={percentage}
+    text={`${percentage}%`}
+    styles={buildStyles({
+      textColor: '#fff',
+      pathColor: '#00ff00',
+      trailColor: '#333'
+    })}
+  />
+  ```
+- Se debe usar para mostrar el progreso de XP del usuario de forma visual y atractiva
 
 **Detalles técnicos:**
 - Frontend: `/cinechamp/src/pages/private/Perfil.tsx`
 - Frontend: `/cinechamp/src/pages/private/PerfilPublico.tsx`
-- Componente existente: `/cinechamp/src/components/PerfilHeader/NivelSteam.tsx`
+- Componente: `/cinechamp/src/components/PerfilHeader/NivelSteam.tsx` (verificar si existe, si no, crear)
 - Backend: Verificar endpoint `/api/logros/forzar/:id` y endpoints de nivel
 - Verificar si el componente `NivelSteam` ya está siendo usado
-- Si no, integrarlo en el perfil
+- Si no existe, crearlo usando `react-circular-progressbar`
+- Si existe, integrarlo en el perfil
 - Agregar animaciones al ganar XP
 - Mostrar cómo se gana XP (tooltip o sección explicativa)
 

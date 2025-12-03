@@ -1,4 +1,5 @@
-const db = require('../models/db'); // Asegúrate de que la ruta sea correcta
+const db = require('../models/db');
+const { agregarExperiencia, RECOMPENSAS_XP } = require('../utils/experienciaHelper');
 
 const obtenerLogrosPorUsuario = async (req, res) => {
   const { username } = req.params;
@@ -107,7 +108,11 @@ const asignarLogro = async (usuarioId, logroId) => {
       'INSERT INTO usuario_logros (usuario_id, logro_id) VALUES (?, ?)',
       [usuarioId, logroId]
     );
-    console.log(`🏆 [LOGRO ASIGNADO] Usuario ${usuarioId} → Logro ${logroId}`);
+
+    // ✨ Agregar XP por completar logro
+    await agregarExperiencia(usuarioId, RECOMPENSAS_XP.COMPLETAR_LOGRO);
+
+    console.log(`🏆 [LOGRO ASIGNADO] Usuario ${usuarioId} → Logro ${logroId} (+${RECOMPENSAS_XP.COMPLETAR_LOGRO} XP)`);
   } else {
     console.log(`🔁 Usuario ${usuarioId} ya tiene el logro ${logroId}, no se vuelve a asignar.`);
   }

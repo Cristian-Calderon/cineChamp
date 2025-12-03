@@ -19,7 +19,7 @@ const obtenerUsuarioPorEmail = async (email) => {
 
 const obtenerUsuarioPorId = async (id) => {
   const [rows] = await db.query(
-    'SELECT id, nick, email, avatar FROM usuario WHERE id = ?',
+    'SELECT id, nick, email, avatar, experiencia FROM usuario WHERE id = ?',
     [id]
   );
   return rows[0];
@@ -57,7 +57,7 @@ const eliminarUsuario = async (id) => {
 
 const obtenerUsuarioPorNick = async (nick) => {
   const [rows] = await db.query(
-    'SELECT id, nick, email, avatar FROM usuario WHERE nick = ?',
+    'SELECT id, nick, email, avatar, experiencia FROM usuario WHERE nick = ?',
     [nick]
   );
   return rows[0];
