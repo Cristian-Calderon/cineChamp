@@ -64,7 +64,7 @@ export default function PaginaPelicula() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id_usuario: userId,
-          id_api: contenido.id,
+          id_tmdb: contenido.id,
           tipo: tipoContenido,
         }),
       });

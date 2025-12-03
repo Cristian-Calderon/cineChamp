@@ -46,29 +46,50 @@ const buscarContenidoController = async (req, res) => {
 };
 
 const agregarContenidoController = async (req, res) => {
-  const { id_usuario, id_api } = req.body;
-  console.log("📩 Datos recibidos en agregarContenidoController:", { id_usuario, id_api });
+  const { id_usuario, id_api, tipo } = req.body;
+  console.log("📩 Datos recibidos en agregarContenidoController:", { id_usuario, id_api, tipo });
 
   if (!id_usuario || !id_api) {
     return res.status(400).json({ error: 'Faltan datos' });
   }
 
   try {
-    let data = await obtenerDetallesPorId(id_api, 'movie');
-    let tipo = 'pelicula';
+    // Determinar el tipo basándose en el parámetro enviado desde el frontend
+    let tipoAPI;
+    let tipoGuardado;
 
-    if (!data || data.success === false) {
-      data = await obtenerDetallesPorId(id_api, 'tv');
-      tipo = 'serie';
+    if (tipo === 'pelicula' || tipo === 'movie') {
+      tipoAPI = 'movie';
+      tipoGuardado = 'pelicula';
+    } else if (tipo === 'serie' || tipo === 'tv') {
+      tipoAPI = 'tv';
+      tipoGuardado = 'serie';
+    } else {
+      // Si no se envía tipo, intentar detectar (primero TV, luego movie)
+      let data = await obtenerDetallesPorId(id_api, 'tv');
+      if (data && data.success !== false) {
+        tipoAPI = 'tv';
+        tipoGuardado = 'serie';
+      } else {
+        data = await obtenerDetallesPorId(id_api, 'movie');
+        if (data && data.success !== false) {
+          tipoAPI = 'movie';
+          tipoGuardado = 'pelicula';
+        } else {
+          return res.status(404).json({ error: 'Contenido no encontrado en TMDB' });
+        }
+      }
     }
 
+    // Verificar que el contenido existe en TMDB
+    const data = await obtenerDetallesPorId(id_api, tipoAPI);
     if (!data || data.success === false) {
       return res.status(404).json({ error: 'Contenido no encontrado en TMDB' });
     }
 
     const [result] = await db.query(
       'INSERT IGNORE INTO contenido_guardado (id_usuario, id_api, tipo) VALUES (?, ?, ?)',
-      [id_usuario, id_api, tipo]
+      [id_usuario, id_api, tipoGuardado]
     );
 
     let id_contenidoGuardado = result.insertId;
@@ -87,7 +108,7 @@ const agregarContenidoController = async (req, res) => {
     await verificarLogros(id_usuario);
 
     res.status(201).json({
-      message: `${tipo === 'pelicula' ? 'Película' : 'Serie'} agregada correctamente.`,
+      message: `${tipoGuardado === 'pelicula' ? 'Película' : 'Serie'} agregada correctamente.`,
       id_contenidoGuardado,
     });
   } catch (error) {
@@ -97,36 +118,60 @@ const agregarContenidoController = async (req, res) => {
 };
 
 const favoritoContenidoController = async (req, res) => {
-  const { id_usuario, id_tmdb } = req.body;
-  console.log("📩 Datos recibidos en favoritoContenidoController:", { id_usuario, id_tmdb });
+  const { id_usuario, id_tmdb, tipo } = req.body;
+  console.log("📩 Datos recibidos en favoritoContenidoController:", { id_usuario, id_tmdb, tipo });
 
   if (!id_usuario || !id_tmdb) {
     return res.status(400).json({ error: 'Faltan datos' });
   }
 
   try {
-    let data = await obtenerDetallesPorId(id_tmdb, 'movie');
-    let tipo = 'pelicula';
+    // Determinar el tipo basándose en el parámetro enviado desde el frontend
+    let tipoAPI;
+    let tipoGuardado;
+    let data;
 
-    if (!data || data.success === false) {
+    if (tipo === 'pelicula' || tipo === 'movie') {
+      tipoAPI = 'movie';
+      tipoGuardado = 'pelicula';
+    } else if (tipo === 'serie' || tipo === 'tv') {
+      tipoAPI = 'tv';
+      tipoGuardado = 'serie';
+    } else {
+      // Si no se envía tipo, intentar detectar (primero TV, luego movie)
       data = await obtenerDetallesPorId(id_tmdb, 'tv');
-      tipo = 'serie';
+      if (data && data.success !== false) {
+        tipoAPI = 'tv';
+        tipoGuardado = 'serie';
+      } else {
+        data = await obtenerDetallesPorId(id_tmdb, 'movie');
+        if (data && data.success !== false) {
+          tipoAPI = 'movie';
+          tipoGuardado = 'pelicula';
+        } else {
+          return res.status(404).json({ error: 'Contenido no encontrado en TMDB' });
+        }
+      }
     }
 
-    if (!data || data.success === false) {
-      return res.status(404).json({ error: 'Contenido no encontrado en TMDB' });
+    // Obtener detalles si aún no se han obtenido
+    if (!data) {
+      data = await obtenerDetallesPorId(id_tmdb, tipoAPI);
+      if (!data || data.success === false) {
+        return res.status(404).json({ error: 'Contenido no encontrado en TMDB' });
+      }
     }
 
     const titulo = data.title || data.name;
 
     await db.query(
       'INSERT IGNORE INTO favoritos (id_usuario, id_tmdb, tipo, titulo) VALUES (?, ?, ?, ?)',
-      [id_usuario, id_tmdb, tipo, titulo]
+      [id_usuario, id_tmdb, tipoGuardado, titulo]
     );
 
     await verificarLogros(id_usuario);
 
-    res.status(201).json({ message: `${tipo === 'pelicula' ? 'Película' : 'Serie'} marcada como favorita: ${titulo}` });
+    res.status(201).json({ message: `${tipoGuardado === 'pelicula' ? 'Película' : 'Serie'} marcada como favorita: ${titulo}` });
   } catch (error) {
     console.error('Error al marcar favorito:', error);
     res.status(500).json({ error: 'Error interno al guardar favorito' });
@@ -271,7 +316,55 @@ const obtenerDetallesContenido = async (req, res) => {
   }
 };
 
+const eliminarDelHistorial = async (req, res) => {
+  const { id_usuario, id_api } = req.body;
+  console.log("📩 Datos recibidos en eliminarDelHistorial:", { id_usuario, id_api });
 
+  if (!id_usuario || !id_api) {
+    return res.status(400).json({ error: 'Faltan datos' });
+  }
+
+  try {
+    const [result] = await db.query(
+      'DELETE FROM contenido_guardado WHERE id_usuario = ? AND id_api = ?',
+      [id_usuario, id_api]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Contenido no encontrado en el historial' });
+    }
+
+    res.status(200).json({ message: 'Contenido eliminado del historial correctamente' });
+  } catch (error) {
+    console.error('❌ Error al eliminar del historial:', error);
+    res.status(500).json({ error: 'Error interno al eliminar del historial' });
+  }
+};
+
+const eliminarDeFavoritos = async (req, res) => {
+  const { id_usuario, id_tmdb } = req.body;
+  console.log("📩 Datos recibidos en eliminarDeFavoritos:", { id_usuario, id_tmdb });
+
+  if (!id_usuario || !id_tmdb) {
+    return res.status(400).json({ error: 'Faltan datos' });
+  }
+
+  try {
+    const [result] = await db.query(
+      'DELETE FROM favoritos WHERE id_usuario = ? AND id_tmdb = ?',
+      [id_usuario, id_tmdb]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Contenido no encontrado en favoritos' });
+    }
+
+    res.status(200).json({ message: 'Contenido eliminado de favoritos correctamente' });
+  } catch (error) {
+    console.error('❌ Error al eliminar de favoritos:', error);
+    res.status(500).json({ error: 'Error interno al eliminar de favoritos' });
+  }
+};
 
 
 
@@ -286,5 +379,7 @@ module.exports = {
   obtenerFavoritosPorUsuario,
   calificarContenido,
   obtenerCalificacionesDelUsuario,
-  obtenerDetallesContenido
+  obtenerDetallesContenido,
+  eliminarDelHistorial,
+  eliminarDeFavoritos
 };

@@ -11,7 +11,9 @@ const {
   obtenerFavoritosPorUsuario,
   calificarContenido,
   obtenerCalificacionesDelUsuario,
-  obtenerDetallesContenido
+  obtenerDetallesContenido,
+  eliminarDelHistorial,
+  eliminarDeFavoritos
 } = require('../controllers/contenidoController');
 
 
@@ -31,6 +33,10 @@ router.post('/agregar', agregarContenidoController);
 router.post('/favorito', favoritoContenidoController);
 router.get('/favoritos/:id_usuario', obtenerFavoritosPorUsuario);
 router.get('/historial/:id_usuario', obtenerHistorialPorUsuario);
+
+// Eliminar del historial y favoritos
+router.delete('/historial/eliminar', eliminarDelHistorial);
+router.delete('/favoritos/eliminar', eliminarDeFavoritos);
 
 
 //para la calificacion y comentario

@@ -109,8 +109,8 @@ El backend sigue patrón MVC con las siguientes capas:
 
 ### Endpoints Importantes
 
-- `POST /api/usuarios/registro` - Registro con avatar opcional (multipart/form-data)
-- `POST /api/usuarios/login` - Login que devuelve JWT
+- `POST /api/usuarios/register` - Registro con avatar (JSON body: nick, email, contraseña, avatar)
+- `POST /api/usuarios/login` - Login que devuelve JWT (JSON body: email, contraseña)
 - `GET /api/usuarios/nick/:nick` - Obtener usuario por nickname
 - `GET /api/usuarios/buscar` - Buscar usuarios
 - `POST /api/contenido/agregar` - Agregar contenido al historial
