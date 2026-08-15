@@ -126,14 +126,43 @@ export default function PaginaPelicula() {
     toast.success(esFavorito ? "Eliminado de favoritos" : "Añadido a favoritos");
   };
 
-  const abrirModalHistorial = () => {
-    if (yaEnHistorial) {
-      toast.info("Ya está en tu historial");
-      return;
+  const eliminarDelHistorial = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3001/api/contenido/eliminar",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id_usuario: userId,
+            id_api: parseInt(id!),
+            tipoGuardado: "historial",
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("No se pudo eliminar del historial");
+      }
+
+      setYaEnHistorial(false);
+
+      toast.success("🗑️ Eliminado del historial");
+    } catch (error) {
+      console.error("Error al eliminar del historial:", error);
+      toast.error("Error al eliminar del historial");
     }
-    setModalVisible(true);
   };
 
+  const abrirModalHistorial = () => {
+    if (yaEnHistorial) {
+      return;
+    }
+
+    setModalVisible(true);
+  };
   const guardarEnHistorialConPuntuacion = async () => {
     const nota = parseInt(puntuacion, 10);
     if (!nota || nota < 1 || nota > 10) {
@@ -150,7 +179,7 @@ export default function PaginaPelicula() {
         body: JSON.stringify({
           id_usuario: userId,
           id_api: parseInt(id!),
-          tipoGuardado: "historial",
+          tipo: tipoContenido,
         }),
       });
 
@@ -243,20 +272,24 @@ export default function PaginaPelicula() {
               <div className="flex flex-wrap gap-4 mt-4">
                 <button
                   onClick={toggleFavorito}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold shadow transition ${
-                    esFavorito
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold shadow transition ${esFavorito
                       ? "bg-red-600 text-white hover:bg-red-700"
                       : "bg-white/30 text-white hover:bg-white/50"
-                  }`}
+                    }`}
                 >
                   ❤️ {esFavorito ? "En Favoritos" : "Añadir a Favoritos"}
                 </button>
 
                 <button
-                  onClick={abrirModalHistorial}
-                  className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold shadow bg-blue-600 text-white hover:bg-blue-700 transition"
+                  onClick={yaEnHistorial ? eliminarDelHistorial : abrirModalHistorial}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold shadow transition ${yaEnHistorial
+                      ? "bg-red-600 text-white hover:bg-red-700"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                    }`}
                 >
-                  🎬 Añadir a Historial
+                  {yaEnHistorial
+                    ? "🗑️ Eliminar de Historial"
+                    : "🎬 Añadir a Historial"}
                 </button>
               </div>
             </div>
@@ -311,7 +344,6 @@ export default function PaginaPelicula() {
             title: pelicula?.titulo,
             media_type: tipo as "movie" | "tv",
           }}
-          tipo="historial"
           onSubmit={guardarEnHistorialConPuntuacion}
           puntuacion={puntuacion}
           setPuntuacion={setPuntuacion}

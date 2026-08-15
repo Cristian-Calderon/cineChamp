@@ -13,7 +13,6 @@ type ModalPuntuacionProps = {
   isOpen: boolean;
   onClose: () => void;
   item: Resultado;
-  tipo: "favorito" | "historial";
   onSubmit: () => void;
   puntuacion: string;
   setPuntuacion: (v: string) => void;
@@ -25,7 +24,6 @@ export default function ModalPuntuacion({
   isOpen,
   onClose,
   item,
-  tipo,
   onSubmit,
   puntuacion,
   setPuntuacion,

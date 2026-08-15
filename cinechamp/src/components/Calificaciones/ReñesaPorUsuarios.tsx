@@ -17,7 +17,7 @@ export default function ResenasDeUsuarios({ id_api, tipo }: Props) {
   const [media, setMedia] = useState<string | null>(null);
   const userNick = localStorage.getItem("nick");
   const userId = localStorage.getItem("userId");
-  const userAvatar = localStorage.getItem("avatar") || null;
+ 
 
   const [editando, setEditando] = useState(false);
   const [comentarioEditado, setComentarioEditado] = useState("");

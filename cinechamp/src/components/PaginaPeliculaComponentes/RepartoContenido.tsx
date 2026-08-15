@@ -1,5 +1,4 @@
-// components/DetalleContenido/RepartoContenido.tsx
-import React from "react";
+
 
 type Actor = {
   nombre: string;

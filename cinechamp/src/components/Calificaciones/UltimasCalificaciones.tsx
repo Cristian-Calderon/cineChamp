@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { Star } from "lucide-react";
 
 interface Calificacion {

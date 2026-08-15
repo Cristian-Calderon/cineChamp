@@ -63,26 +63,34 @@ const agregarContenidoController = async (req, res) => {
       return res.status(404).json({ error: 'Contenido no encontrado en TMDB' });
     }
 
-    const [result] = await db.query(
-      'INSERT IGNORE INTO contenido_guardado (id_usuario, id_api, tipo) VALUES (?, ?, ?)',
-      [id_usuario, id_api, tipo]
-    );
+const [result] = await db.query(
+  'INSERT IGNORE INTO contenido_guardado (id_usuario, id_api, tipo) VALUES (?, ?, ?)',
+  [id_usuario, id_api, tipo]
+);
 
-    let id_contenidoGuardado = result.insertId;
+let id_contenidoGuardado = result.insertId;
+const contenidoNuevo = result.affectedRows === 1;
 
-    if (!id_contenidoGuardado) {
-      const [rows] = await db.query(
-        'SELECT id FROM contenido_guardado WHERE id_usuario = ? AND id_api = ?',
-        [id_usuario, id_api]
-      );
-      if (rows.length === 0) {
-        return res.status(404).json({ error: 'No se encontró contenido_guardado existente' });
-      }
-      id_contenidoGuardado = rows[0].id;
-    }
+if (!id_contenidoGuardado) {
+  const [rows] = await db.query(
+    'SELECT id FROM contenido_guardado WHERE id_usuario = ? AND id_api = ? AND tipo = ?',
+    [id_usuario, id_api, tipo]
+  );
 
-    await otorgarXP(id_usuario, 'favorito');
-    await verificarLogros(id_usuario);
+  if (rows.length === 0) {
+    return res.status(404).json({
+      error: 'No se encontró contenido_guardado existente'
+    });
+  }
+
+  id_contenidoGuardado = rows[0].id;
+}
+
+if (contenidoNuevo) {
+  await otorgarXP(id_usuario, 'contenido', id_api, tipo);
+  await verificarLogros(id_usuario);
+}
+
 
     res.status(201).json({
       message: `${tipo === 'pelicula' ? 'Película' : 'Serie'} agregada correctamente.`,
@@ -96,9 +104,11 @@ const agregarContenidoController = async (req, res) => {
 
 const favoritoContenidoController = async (req, res) => {
   const { id_usuario, id_tmdb } = req.body;
-  await otorgarXP(id_usuario, 'favorito');
 
-  console.log("📩 Datos recibidos en favoritoContenidoController:", { id_usuario, id_tmdb });
+  console.log("📩 Datos recibidos en favoritoContenidoController:", {
+    id_usuario,
+    id_tmdb
+  });
 
   if (!id_usuario || !id_tmdb) {
     return res.status(400).json({ error: 'Faltan datos' });
@@ -114,22 +124,35 @@ const favoritoContenidoController = async (req, res) => {
     }
 
     if (!data || data.success === false) {
-      return res.status(404).json({ error: 'Contenido no encontrado en TMDB' });
+      return res.status(404).json({
+        error: 'Contenido no encontrado en TMDB'
+      });
     }
 
     const titulo = data.title || data.name;
 
-    await db.query(
+    const [result] = await db.query(
       'INSERT IGNORE INTO favoritos (id_usuario, id_tmdb, titulo) VALUES (?, ?, ?)',
       [id_usuario, id_tmdb, titulo]
     );
 
-    await verificarLogros(id_usuario);
+    const favoritoNuevo = result.affectedRows === 1;
 
-    res.status(201).json({ message: `${tipo === 'pelicula' ? 'Película' : 'Serie'} marcada como favorita: ${titulo}` });
+  if (favoritoNuevo) {
+  await otorgarXP(id_usuario, 'favorito', id_tmdb, tipo);
+  await verificarLogros(id_usuario);
+}
+    res.status(201).json({
+      message: favoritoNuevo
+        ? `${tipo === 'pelicula' ? 'Película' : 'Serie'} marcada como favorita: ${titulo}`
+        : 'El contenido ya estaba en favoritos'
+    });
+
   } catch (error) {
     console.error('Error al marcar favorito:', error);
-    res.status(500).json({ error: 'Error interno al guardar favorito' });
+    res.status(500).json({
+      error: 'Error interno al guardar favorito'
+    });
   }
 };
 
@@ -220,47 +243,125 @@ const obtenerHistorialPorUsuario = async (req, res) => {
 const calificarContenido = async (req, res) => {
   const { id_usuario, id_api, tipo, puntuacion, comentario } = req.body;
 
-  if (comentario) {
-  await otorgarXP(id_usuario, 'comentario');
-}
-  
-  
   if (!id_usuario || !id_api || !tipo || !puntuacion) {
-    return res.status(400).json({ error: 'Faltan datos requeridos' });
+    return res.status(400).json({
+      error: 'Faltan datos requeridos'
+    });
   }
 
   if (puntuacion < 1 || puntuacion > 10) {
-    return res.status(400).json({ error: 'La puntuación debe estar entre 1 y 10' });
+    return res.status(400).json({
+      error: 'La puntuación debe estar entre 1 y 10'
+    });
   }
 
   try {
-    // ¿Ya existe una calificación?
     const [existe] = await db.query(
       'SELECT * FROM calificacion WHERE id_usuario = ? AND id_api = ? AND tipo = ?',
       [id_usuario, id_api, tipo]
     );
 
+    /*
+     * ---------------------------------------------------------
+     * YA EXISTE UNA CALIFICACIÓN
+     * ---------------------------------------------------------
+     */
     if (existe.length > 0) {
-      // Si existe, actualiza solo el comentario
+      const comentarioAnterior = existe[0].comentario;
+
+      const teniaComentario =
+        comentarioAnterior &&
+        comentarioAnterior.trim() !== '';
+
+      const nuevoComentario =
+        comentario &&
+        comentario.trim() !== '';
+
+      // Actualizamos el comentario
       await db.query(
         'UPDATE calificacion SET comentario = ? WHERE id_usuario = ? AND id_api = ? AND tipo = ?',
-        [comentario || null, id_usuario, id_api, tipo]
+        [
+          nuevoComentario ? comentario.trim() : null,
+          id_usuario,
+          id_api,
+          tipo
+        ]
       );
-      return res.status(200).json({ message: '✏️ Comentario actualizado' });
-    } else {
-      // Si no existe, inserta
-      await db.query(
-        'INSERT INTO calificacion (id_usuario, id_api, tipo, puntuacion, comentario) VALUES (?, ?, ?, ?, ?)',
-        [id_usuario, id_api, tipo, puntuacion, comentario || null]
-      );
-      return res.status(201).json({ message: '✅ Calificación creada correctamente' });
+
+      /*
+       * Si antes NO tenía comentario y ahora SÍ,
+       * es un comentario nuevo → +40 XP.
+       *
+       * Si ya tenía comentario, simplemente lo está editando
+       * → no damos XP.
+       */
+      if (!teniaComentario && nuevoComentario) {
+        const recompensaDada = await otorgarXP(
+          id_usuario,
+          'comentario',
+          id_api,
+          tipo
+        );
+
+        if (recompensaDada) {
+          await verificarLogros(id_usuario);
+        }
+      }
+
+      return res.status(200).json({
+        message: !teniaComentario && nuevoComentario
+          ? '✅ Comentario añadido correctamente'
+          : '✏️ Comentario actualizado'
+      });
     }
+
+    /*
+     * ---------------------------------------------------------
+     * NO EXISTE UNA CALIFICACIÓN
+     * ---------------------------------------------------------
+     */
+    await db.query(
+      'INSERT INTO calificacion (id_usuario, id_api, tipo, puntuacion, comentario) VALUES (?, ?, ?, ?, ?)',
+      [
+        id_usuario,
+        id_api,
+        tipo,
+        puntuacion,
+        comentario && comentario.trim()
+          ? comentario.trim()
+          : null
+      ]
+    );
+
+    /*
+     * Si la nueva calificación incluye comentario,
+     * damos los +40 XP.
+     */
+    if (comentario && comentario.trim()) {
+      const recompensaDada = await otorgarXP(
+        id_usuario,
+        'comentario',
+        id_api,
+        tipo
+      );
+
+      if (recompensaDada) {
+        await verificarLogros(id_usuario);
+      }
+    }
+
+    return res.status(201).json({
+      message: '✅ Calificación creada correctamente'
+    });
+
   } catch (error) {
     console.error('❌ Error al guardar calificación:', error);
-    res.status(500).json({ error: 'Error interno al guardar la calificación' });
+
+    return res.status(500).json({
+      error: 'Error interno al guardar la calificación'
+    });
   }
 };
-
 
 
 

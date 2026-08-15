@@ -17,7 +17,7 @@ export default function Buscador() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [query, setQuery] = useState("");
+
   const [resultados, setResultados] = useState<Resultado[]>([]);
   const [loading, setLoading] = useState(false);
   const userId = parseInt(localStorage.getItem("userId") || "0");
@@ -29,7 +29,6 @@ export default function Buscador() {
 
   useEffect(() => {
     const q = new URLSearchParams(location.search).get("q") || "";
-    setQuery(q);
     if (q) buscar(q);
   }, [location.search]);
 
@@ -212,7 +211,6 @@ export default function Buscador() {
               setComentarioInput("");
             }}
             item={modalItem}
-            tipo="historial"
             onSubmit={guardarContenido}
             puntuacion={puntuacionInput}
             setPuntuacion={setPuntuacionInput}
