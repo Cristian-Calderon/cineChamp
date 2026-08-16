@@ -6,7 +6,7 @@ const usuarioRoutes = require('./routes/usuarioRoutes');
 const contenidoRoutes = require('./routes/contenidoRoutes');
 const logrosRoutes = require('./routes/logrosRoutes');
 const path = require('path');
-const { verificarLogros } = require('./controllers/logrosController.js');
+const { verificarLogros } = require('./logros');
 
 
 

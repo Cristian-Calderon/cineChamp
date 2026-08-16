@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const Usuario = require('../models/usuarioModel');
 const db = require('../models/db');
 require('dotenv').config();
-const { asignarLogro } = require('./logrosController'); // ajusta ruta si está en otra carpeta
+
 
 
 async function registrar(req, res) {
@@ -17,8 +17,7 @@ async function registrar(req, res) {
 
     const id = await Usuario.crearUsuario(nick, email, hashed, avatar);
 
-    await asignarLogro(id, 21); // ejemplo: logro por registrarse
-
+   
     res.status(201).json({ message: "Usuario creado", id });
   } catch (error) {
     res.status(500).json({ error: error.message });
