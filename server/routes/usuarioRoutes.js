@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const UsuarioController = require('../controllers/usuarioController');
 const upload = require("../utils/multerConfig");
+const authMiddleware = require('../middleware/authMiddleware');
 
 
 
@@ -17,7 +18,12 @@ router.get('/buscar', UsuarioController.buscarUsuariosPorNick);
 router.get('/:id', UsuarioController.obtenerUsuarioPorId);
 
 // Actualización (con avatar opcional)
-router.put('/:id', upload.single('avatar'), UsuarioController.actualizarUsuario);
+router.put(
+  '/:id',
+  authMiddleware,
+  upload.single('avatar'),
+  UsuarioController.actualizarUsuario
+);
 
 // Contadores y calificaciones
 router.get('/contador-calificaciones/:id', UsuarioController.contarCalificaciones);

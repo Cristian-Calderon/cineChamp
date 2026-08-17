@@ -13,7 +13,7 @@ const verificarLogros = async (usuarioId) => {
   }
 
   // 🎬 Logros de películas vistas
-  await evaluarLogrosHistorial(usuarioId);
+  await evaluarLogrosHistorial(usuarioId);  
 
   // 👤 Logros según posición de registro
   await evaluarLogrosRegistro(usuarioId);

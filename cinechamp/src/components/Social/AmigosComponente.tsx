@@ -31,7 +31,10 @@ export default function AmigosComponentes({ amigos, esPropio = false }: AmigosPr
       ) : (
         <div className="flex gap-4 items-center">
           {amigosCortos.map((amigo) => (
-            <div key={amigo.id} className="w-14 flex flex-col items-center text-center">
+            <div
+              key={`${amigo.id}-${amigo.nick}`}
+              className="w-14 flex flex-col items-center text-center"
+            >
               <div
                 onClick={() => navigate(`/usuario/${amigo.nick}`)}
                 className="cursor-pointer"
@@ -70,7 +73,10 @@ export default function AmigosComponentes({ amigos, esPropio = false }: AmigosPr
             </div>
             <div className="flex flex-wrap gap-4 justify-center">
               {amigos.map((amigo) => (
-                <div key={amigo.id} className="text-center w-20">
+                <div
+                  key={`${amigo.id}-${amigo.nick}`}
+                  className="text-center w-20"
+                >
                   <Avatar src={amigo.avatar} size={56} />
                   <p className="text-sm truncate">{amigo.nick}</p>
                 </div>

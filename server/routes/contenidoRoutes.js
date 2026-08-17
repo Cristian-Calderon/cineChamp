@@ -1,6 +1,6 @@
-// routes/contenidoRoutes.js
 const express = require('express');
 const router = express.Router();
+
 const {
   verificarConexionAPI,
   buscarContenidoController,
@@ -20,46 +20,151 @@ const {
   obtenerTemporadasVistas,
   eliminarFavoritoController
 } = require('../controllers/contenidoController');
+
 const { obtenerNivelUsuario } = require('../controllers/nivelController');
 
+const authMiddleware = require('../middleware/authMiddleware');
+const sameUserMiddleware = require('../middleware/sameUserMiddleware');
 
 
+// =====================================================
+// RUTAS PÚBLICAS
+// =====================================================
 
-// Verificación de conexión
+// Verificación de conexión con TMDB
 router.get('/check-api', verificarConexionAPI);
 
 // Búsquedas
 router.get('/bContenido', buscarContenidoController);
-router.get('/buscar', buscarAPI); 
+router.get('/buscar', buscarAPI);
+
+// Detalles de contenido
+router.get('/detalles/:tipo/:id', obtenerDetallesCompletos);
+
+// Estructura de series
+router.get(
+  '/series/:id_api/tmdb/estructura-simple',
+  obtenerDatosSeries
+);
+
+// Comentarios/reseñas públicas
+router.get(
+  '/comentarios/:id_api',
+  obtenerResenasPorContenido
+);
 
 
+// =====================================================
+// RUTAS PROTEGIDAS
+// =====================================================
 
-// Agregar y marcar como favorito
-router.post('/agregar', agregarContenidoController);
-router.post('/favorito', favoritoContenidoController);
-router.delete('/favorito', eliminarFavoritoController);
+// Agregar contenido al historial
+router.post(
+  '/agregar',
+  authMiddleware,
+  sameUserMiddleware,
+  agregarContenidoController
+);
 
-router.get('/favoritos/:id_usuario', obtenerFavoritosPorUsuario);
-router.get('/historial/:id_usuario', obtenerHistorialPorUsuario);
+// Añadir a favoritos
+router.post(
+  '/favorito',
+  authMiddleware,
+  sameUserMiddleware,
+  favoritoContenidoController
+);
+
+// Eliminar de favoritos
+router.delete(
+  '/favorito',
+  authMiddleware,
+  eliminarFavoritoController
+);
+
+// Obtener favoritos
+router.get(
+  '/favoritos/:id_usuario',
+  authMiddleware,
+  obtenerFavoritosPorUsuario
+);
+
+// Obtener historial
+router.get(
+  '/historial/:id_usuario',
+  authMiddleware,
+  obtenerHistorialPorUsuario
+);
 
 
-//para la calificacion y comentario
-router.post('/calificar', calificarContenido);
-router.get('/usuarios/:id_usuario/calificaciones', obtenerCalificacionesDelUsuario);
+// =====================================================
+// CALIFICACIONES
+// =====================================================
+
+// Crear o modificar una calificación
+router.post(
+  '/calificar',
+  authMiddleware,
+  sameUserMiddleware,
+  calificarContenido
+);
+
+// Obtener calificaciones de un usuario
+router.get(
+  '/usuarios/:id_usuario/calificaciones',
+  obtenerCalificacionesDelUsuario
+);
 
 
-router.get("/detalles/:tipo/:id", obtenerDetallesCompletos);
+// =====================================================
+// TEMPORADAS
+// =====================================================
 
-router.get('/series/:id_api/tmdb/estructura-simple', obtenerDatosSeries);
-router.post("/temporada/vista", marcarTemporadaVista);
-router.delete("/temporada/vista", desmarcarTemporadaVista);
-router.get('/temporadas-vistas/:id_usuario/:id_serie', obtenerTemporadasVistas);
+// Marcar temporada como vista
+router.post(
+  '/temporada/vista',
+  authMiddleware,
+  sameUserMiddleware,
+  marcarTemporadaVista
+);
 
-router.get('/xp/:id_usuario', obtenerNivelUsuario);
+// Desmarcar temporada como vista
+router.delete(
+  '/temporada/vista',
+  authMiddleware,
+  sameUserMiddleware,
+  desmarcarTemporadaVista
+);
 
-router.get("/comentarios/:id_api", obtenerResenasPorContenido);
+// Obtener temporadas vistas
+router.get(
+  '/temporadas-vistas/:id_usuario/:id_serie',
+  authMiddleware,
+  sameUserMiddleware,
+  obtenerTemporadasVistas
+);
 
-router.delete("/eliminar", eliminarContenidoController);
+
+// =====================================================
+// EXPERIENCIA / NIVEL
+// =====================================================
+
+router.get(
+  '/xp/:id_usuario',
+  authMiddleware,
+  obtenerNivelUsuario
+);
+
+
+// =====================================================
+// ELIMINAR CONTENIDO
+// =====================================================
+
+router.delete(
+  '/eliminar',
+  authMiddleware,
+  sameUserMiddleware,
+  eliminarContenidoController
+);
 
 
 module.exports = router;

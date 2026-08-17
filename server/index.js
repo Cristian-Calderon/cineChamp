@@ -41,6 +41,15 @@ app.get('/check-db', async (req, res) => {
   }
 });
 
+const authMiddleware = require('./middleware/authMiddleware');
+
+app.get('/api/test-auth', authMiddleware, (req, res) => {
+  res.json({
+    message: 'Autenticación correcta',
+    usuario: req.usuario
+  });
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Servidor backend corriendo en http://localhost:${PORT}`);

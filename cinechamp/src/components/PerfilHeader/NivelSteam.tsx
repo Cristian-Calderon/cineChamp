@@ -14,26 +14,39 @@ useEffect(() => {
   console.log("Componente NivelSteam montado");
   console.log("ID del usuario recibido:", id_usuario);
 
-  const fetchNivel = async () => {
-    try {
-      const res = await fetch(`/api/contenido/xp/${id_usuario}`);
-      const data = await res.json();
-      console.log("Respuesta de la API:", data);
+ const fetchNivel = async () => {
+  try {
+    const token = localStorage.getItem("token");
 
-      if (
-        typeof data.nivel === "number" &&
-        typeof data.progreso === "number"
-      ) {
-        console.log("Nivel:", data.nivel, "Progreso:", data.progreso);
-        setNivel(data.nivel);
-        setProgreso(data.progreso);
-      } else {
-        console.warn("⚠️ Datos no válidos:", data);
-      }
-    } catch (error) {
-      console.error("❌ Error al cargar nivel:", error);
+    const res = await fetch(`/api/contenido/xp/${id_usuario}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    console.log("Respuesta de la API:", data);
+
+    if (!res.ok) {
+      console.error("❌ Error de autenticación:", data);
+      return;
     }
-  };
+
+    if (
+      typeof data.nivel === "number" &&
+      typeof data.progreso === "number"
+    ) {
+      console.log("Nivel:", data.nivel, "Progreso:", data.progreso);
+      setNivel(data.nivel);
+      setProgreso(data.progreso);
+    } else {
+      console.warn("⚠️ Datos no válidos:", data);
+    }
+  } catch (error) {
+    console.error("❌ Error al cargar nivel:", error);
+  }
+};
 
   if (id_usuario && id_usuario !== 0) {
     fetchNivel();

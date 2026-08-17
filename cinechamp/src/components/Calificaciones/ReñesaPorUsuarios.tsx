@@ -51,17 +51,25 @@ export default function ResenasDeUsuarios({ id_api, tipo }: Props) {
     if (!userId) return;
 
     try {
-      const response = await fetch("http://localhost:3001/api/contenido/calificar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id_usuario: Number(userId),
-          id_api,
-          tipo: tipo === "tv" ? "serie" : "pelicula",
-          puntuacion: puntuacionEditada,
-          comentario: comentarioEditado,
-        }),
-      });
+      const token = localStorage.getItem("token");
+
+const response = await fetch(
+  "http://localhost:3001/api/contenido/calificar",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      id_usuario: Number(userId),
+      id_api,
+      tipo: tipo === "tv" ? "serie" : "pelicula",
+      puntuacion: puntuacionEditada,
+      comentario: comentarioEditado,
+    }),
+  }
+);
 
       if (!response.ok) {
         const errorText = await response.text();

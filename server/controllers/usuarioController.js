@@ -56,19 +56,34 @@ async function login(req, res) {
 async function actualizarUsuario(req, res) {
   try {
     const { id } = req.params;
+
+    if (Number(req.usuario.id) !== Number(id)) {
+      return res.status(403).json({
+        error: 'No puedes modificar otro usuario'
+      });
+    }
+
     const { nick } = req.body;
 
-    // avatar puede venir como nuevo archivo o como URL del frontend
-    const avatar = req.file ? "/uploads/" + req.file.filename : req.body.avatar || null;
+    const avatar = req.file
+      ? "/uploads/" + req.file.filename
+      : req.body.avatar || null;
 
     const actualizado = await Usuario.actualizarUsuario(id, nick, avatar);
 
     if (actualizado === 0)
-      return res.status(404).json({ error: "Usuario no encontrado" });
+      return res.status(404).json({
+        error: "Usuario no encontrado"
+      });
 
-    res.json({ message: "Usuario actualizado correctamente" });
+    res.json({
+      message: "Usuario actualizado correctamente"
+    });
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message
+    });
   }
 }
 
